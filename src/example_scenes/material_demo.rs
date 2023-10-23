@@ -8,24 +8,26 @@ pub fn material_demo() -> Scene {
     let resolution = uvec2(800, 450);
     let camera = Camera::new(resolution);
 
-    let default_mat = Rc::new(MatteMaterial::new(Vec3::splat(0.5)));
+    let white = Rc::new(MatteMaterial::new(Vec3::ONE));
+    let red_mat = Rc::new(MatteMaterial::new(Vec3::new(0.5, 0.0, 0.0)));
+    let blue_mat = Rc::new(MatteMaterial::new(Vec3::new(0.0, 0.0, 0.5)));
 
     let floor_sphere = {
         let shape = Sphere::new(vec3(0.0, -100.0, 0.0), 100.0);
-        Primitive::new(shape, default_mat.clone())
+        Primitive::new(shape, white.clone())
     };
 
-    let center_sphere = {
-        let shape = Sphere::new(vec3(0.0, 1.0, 0.0), 1.0);
-        Primitive::new(shape, default_mat.clone())
+    let left_sphere = {
+        let shape = Sphere::new(vec3(-1.0, 1.0, 0.0), 1.0);
+        Primitive::new(shape, red_mat.clone())
     };
 
-    let small_sphere = {
-        let shape = Sphere::new(vec3(1.0, 0.25, -1.0), 0.25);
-        Primitive::new(shape, default_mat.clone())
+    let right_sphere = {
+        let shape = Sphere::new(vec3(1.0, 1.0, 0.0), 1.0);
+        Primitive::new(shape, blue_mat.clone())
     };
 
-    let aggregate = vec![floor_sphere, center_sphere, small_sphere];
+    let aggregate = vec![floor_sphere, left_sphere, right_sphere];
 
     Scene::new(camera, aggregate)
 }
