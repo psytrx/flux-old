@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use glam::Vec3;
 
 use super::{interaction::Interaction, ray::Ray};
@@ -12,7 +14,7 @@ impl Sphere {
         Self { center, radius }
     }
 
-    pub fn hit(&self, ray: &Ray) -> Option<Interaction> {
+    pub fn intersect(&self, ray: &Ray, t: Range<f32>) -> Option<Interaction> {
         let oc = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let half_b = oc.dot(ray.direction);
@@ -23,14 +25,15 @@ impl Sphere {
             None
         } else {
             let sqrt_d = discriminant.sqrt();
-            let mut t = (-half_b - sqrt_d) / a;
-            if t < ray.t.start || t > ray.t.end {
-                t = (-half_b + sqrt_d) / a;
-                if t < ray.t.start || t > ray.t.end {
+            let mut root = (-half_b - sqrt_d) / a;
+            if root < t.start || root > t.end {
+                root = (-half_b + sqrt_d) / a;
+                if root < t.start || root > t.end {
                     return None;
                 }
             }
 
+            let t = root;
             let p = ray.at(t);
             let outward_normal = (p - self.center) / self.radius;
             let front_face = ray.direction.dot(outward_normal) < 0.0;
@@ -40,7 +43,12 @@ impl Sphere {
                 -outward_normal
             };
 
-            Some(Interaction { p, n, front_face })
+            Some(Interaction {
+                t,
+                p,
+                n,
+                front_face,
+            })
         }
     }
 }
