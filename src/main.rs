@@ -1,7 +1,7 @@
 mod flux;
 
 use anyhow::Result;
-use flux::{Camera, Scene, ShapeList, Sphere};
+use flux::{Camera, Scene, Sphere};
 use glam::{uvec2, vec3};
 use measure_time::trace_time;
 
@@ -22,11 +22,11 @@ fn load_scene() -> Scene {
     let resolution = uvec2(800, 450);
     let camera = Camera::new(resolution);
 
-    let aggregate = ShapeList::new(vec![
+    let aggregate = vec![
         Sphere::new(vec3(0.0, 1.0, 0.0), 1.0),
         Sphere::new(vec3(1.0, 0.25, -1.0), 0.25),
         Sphere::new(vec3(0.0, -100.0, 0.0), 100.0),
-    ]);
+    ];
 
-    Scene { camera, aggregate }
+    Scene::new(camera, aggregate)
 }
