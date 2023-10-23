@@ -1,3 +1,4 @@
+mod interaction;
 mod ray;
 mod sphere;
 
@@ -34,14 +35,15 @@ pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
 fn pixel_color(ray: &Ray) -> Vec3 {
     let sphere = Sphere::new(Vec3::ZERO, 1.0);
 
-    if sphere.hit(ray) {
-        Vec3::X
-    } else {
-        let unit_direction = ray.direction.normalize();
-        let a = (unit_direction.y + 1.0) / 2.0;
-        let horizon_color = vec3(0.5, 0.7, 1.0);
-        let zenith_color = vec3(1.0, 1.0, 1.0);
-        (1.0 - a) * zenith_color + a * horizon_color
+    match sphere.hit(ray) {
+        None => {
+            let unit_direction = ray.direction.normalize();
+            let a = (unit_direction.y + 1.0) / 2.0;
+            let horizon_color = vec3(0.5, 0.7, 1.0);
+            let zenith_color = vec3(1.0, 1.0, 1.0);
+            (1.0 - a) * zenith_color + a * horizon_color
+        }
+        Some(int) => (int.n + 1.0) / 2.0,
     }
 }
 
