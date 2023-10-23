@@ -12,11 +12,11 @@ use super::{film::Film, ray::Ray, uniform_sample_sphere, CameraSample, Scene};
 pub struct Renderer {
     samples_per_pixel: u32,
     max_depth: u32,
-    num_passes: u64,
+    num_passes: usize,
 }
 
 impl Renderer {
-    pub fn new(samples_per_pixel: u32, max_depth: u32, num_passes: u64) -> Self {
+    pub fn new(samples_per_pixel: u32, max_depth: u32, num_passes: usize) -> Self {
         Self {
             samples_per_pixel,
             max_depth,
@@ -68,9 +68,9 @@ impl Renderer {
         RenderResult { film }
     }
 
-    fn render_pass(&self, scene: &Scene, pass: u64) -> RenderResult {
+    fn render_pass(&self, scene: &Scene, pass: usize) -> RenderResult {
         let mut film = Film::new(scene.camera.resolution);
-        let mut rng = StdRng::seed_from_u64(pass);
+        let mut rng = StdRng::seed_from_u64(pass.try_into().unwrap());
 
         for y in 0..scene.camera.resolution.y {
             for x in 0..scene.camera.resolution.x {

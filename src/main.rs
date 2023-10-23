@@ -13,8 +13,12 @@ fn main() -> Result<()> {
     env_logger::init();
     trace_time!("main");
 
+    let sweeps = 1;
+    let num_cpus = num_cpus::get();
+    let num_passes = sweeps * num_cpus;
+
     let scene = load_scene();
-    let renderer = Renderer::new(4, 16, 128);
+    let renderer = Renderer::new(1, 16, num_passes);
     let result = renderer.render_film(&scene);
     let img = result.film.to_srgb_image();
     img.save("./output/output.png")?;
