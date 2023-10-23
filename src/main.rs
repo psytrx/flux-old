@@ -9,7 +9,7 @@ use log::debug;
 use measure_time::trace_time;
 use num_format::{Locale, ToFormattedString};
 
-use crate::flux::Renderer;
+use crate::flux::{Denoiser, Renderer};
 
 fn main() -> Result<()> {
     env_logger::init();
@@ -37,6 +37,13 @@ fn main() -> Result<()> {
     );
 
     result.film.to_srgb_image().save("./output/output.png")?;
+    std::fs::copy("./output/output.png", "./output/output-raw.png")?;
+
+    unsafe {
+        let denoiser = Denoiser::new(scene.camera.resolution);
+        let denoised = denoiser.denoise(&result.film);
+        denoised.to_srgb_image().save("./output/output.png")?;
+    }
 
     Ok(())
 }

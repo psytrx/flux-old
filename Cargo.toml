@@ -15,6 +15,7 @@ log = "0.4.20"
 measure_time = "0.8.2"
 num-format = "0.4.4"
 num_cpus = "1.16.0"
+oidn2-sys = "0.0.1"
 rand = "0.8.5"
 rayon = "1.8.0"
 

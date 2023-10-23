@@ -3,7 +3,7 @@ use image::{Rgb, RgbImage};
 
 #[derive(Debug)]
 pub struct Film {
-    resolution: UVec2,
+    pub resolution: UVec2,
     pixels: Vec<Pixel>,
 }
 
@@ -11,6 +11,25 @@ impl Film {
     pub fn new(resolution: UVec2) -> Self {
         let buffer_size = (resolution.x * resolution.y) as usize;
         let pixels = vec![Pixel::ZERO; buffer_size];
+        Self::from_pixels(resolution, pixels)
+    }
+
+    pub fn from_rgb_f32_slice(resolution: UVec2, data: &mut [f32]) -> Self {
+        let pixels = data
+            .chunks_exact(3)
+            .map(|chunk| Pixel {
+                color_sum: match chunk {
+                    [r, g, b] => vec3(*r, *g, *b),
+                    _ => panic!("Invalid chunk size"),
+                },
+                weight_sum: 1.0,
+            })
+            .collect();
+
+        Self::from_pixels(resolution, pixels)
+    }
+
+    fn from_pixels(resolution: UVec2, pixels: Vec<Pixel>) -> Self {
         Self { resolution, pixels }
     }
 
@@ -23,7 +42,7 @@ impl Film {
         (y * self.resolution.x + x) as usize
     }
 
-    fn pixel(&self, x: u32, y: u32) -> &Pixel {
+    pub fn pixel(&self, x: u32, y: u32) -> &Pixel {
         let index = self.index(x, y);
         &self.pixels[index]
     }
@@ -71,7 +90,7 @@ fn color_to_srgb(color: Vec3) -> Rgb<u8> {
 }
 
 #[derive(Clone, Debug)]
-struct Pixel {
+pub struct Pixel {
     color_sum: Vec3,
     weight_sum: f32,
 }

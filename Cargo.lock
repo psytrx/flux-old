@@ -269,6 +269,7 @@ dependencies = [
  "measure_time",
  "num-format",
  "num_cpus",
+ "oidn2-sys",
  "rand",
  "rayon",
 ]
@@ -560,6 +561,15 @@ checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "oidn2-sys"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed0eb292f75c8a207a90b5e8efe9aac8b057fce403e1f2ef8219ac9b5b244c3b"
+dependencies = [
+ "bindgen",
 ]
 
 [[package]]

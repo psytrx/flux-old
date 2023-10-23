@@ -1,5 +1,6 @@
 mod accel;
 mod camera;
+mod denoise;
 mod film;
 mod interaction;
 mod ray;
@@ -8,6 +9,7 @@ mod scene;
 mod sphere;
 
 pub use camera::Camera;
+pub use denoise::Denoiser;
 pub use render::Renderer;
 pub use scene::Scene;
 pub use sphere::Sphere;
