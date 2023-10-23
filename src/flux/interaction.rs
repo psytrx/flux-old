@@ -12,7 +12,7 @@ pub struct Interaction {
 
 impl Interaction {
     pub fn spawn_ray(&self, direction: Vec3) -> Ray {
-        let origin = offset_ray_origin(self.p, self.n);
+        let origin = offset_ray_origin(self.p, 8.0 * self.n);
         Ray::new(origin, direction, self.time)
     }
 }
