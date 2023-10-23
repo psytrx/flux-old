@@ -15,7 +15,8 @@ fn main() -> Result<()> {
 
     let scene = load_scene();
     let renderer = Renderer::new(64);
-    let img = renderer.render_image(&scene);
+    let film = renderer.render_film(&scene);
+    let img = film.to_srgb_image();
     img.save("./output/output.png")?;
 
     Ok(())

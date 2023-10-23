@@ -1,0 +1,80 @@
+use glam::{vec3, UVec2, Vec2, Vec3};
+use image::{Rgb, RgbImage};
+
+pub struct Film {
+    resolution: UVec2,
+    pixels: Vec<Pixel>,
+}
+
+impl Film {
+    pub fn new(resolution: UVec2) -> Self {
+        let buffer_size = (resolution.x * resolution.y) as usize;
+        let pixels = vec![Pixel::ZERO; buffer_size];
+        Self { resolution, pixels }
+    }
+
+    fn index(&self, x: u32, y: u32) -> usize {
+        assert!(x <= self.resolution.x && y <= self.resolution.y);
+
+        let x = x.min(self.resolution.x - 1);
+        let y = y.min(self.resolution.y - 1);
+
+        (y * self.resolution.x + x) as usize
+    }
+
+    fn pixel(&self, x: u32, y: u32) -> &Pixel {
+        let index = self.index(x, y);
+        &self.pixels[index]
+    }
+
+    fn pixel_mut(&mut self, x: u32, y: u32) -> &mut Pixel {
+        let index = self.index(x, y);
+        &mut self.pixels[index]
+    }
+
+    pub fn add_sample(&mut self, p_film: Vec2, color: Vec3, sample_weight: f32) {
+        let pixel = self.pixel_mut(p_film.x as u32, p_film.y as u32);
+        pixel.color_sum += color;
+        pixel.weight_sum += sample_weight;
+    }
+
+    pub fn to_srgb_image(&self) -> RgbImage {
+        RgbImage::from_fn(self.resolution.x, self.resolution.y, |x, y| {
+            let pixel = self.pixel(x, y);
+            let color = pixel.color();
+            color_to_srgb(color)
+        })
+    }
+}
+
+fn color_to_srgb(color: Vec3) -> Rgb<u8> {
+    // "gamma 2" correction
+    let color = vec3(color.x.sqrt(), color.y.sqrt(), color.z.sqrt());
+
+    let ir = (255.0 * color.x.clamp(0.0, 1.0)) as u8;
+    let ig = (255.0 * color.y.clamp(0.0, 1.0)) as u8;
+    let ib = (255.0 * color.z.clamp(0.0, 1.0)) as u8;
+
+    Rgb([ir, ig, ib])
+}
+
+#[derive(Clone)]
+struct Pixel {
+    color_sum: Vec3,
+    weight_sum: f32,
+}
+
+impl Pixel {
+    pub const ZERO: Self = Self {
+        color_sum: Vec3::ZERO,
+        weight_sum: 0.0,
+    };
+
+    pub fn color(&self) -> Vec3 {
+        if self.weight_sum == 0.0 {
+            self.color_sum
+        } else {
+            self.color_sum / self.weight_sum
+        }
+    }
+}

@@ -1,12 +1,12 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use glam::{vec2, vec3, Vec2, Vec3};
-use image::{ImageBuffer, Rgb, RgbImage};
+
 use log::debug;
 use num_format::{Locale, ToFormattedString};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
-use super::{ray::Ray, uniform_sample_sphere, CameraSample, Scene};
+use super::{film::Film, ray::Ray, uniform_sample_sphere, CameraSample, Scene};
 
 pub struct Renderer {
     samples_per_pixel: usize,
@@ -23,18 +23,14 @@ impl Renderer {
         }
     }
 
-    pub fn render_image(&self, scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+    pub fn render_film(&self, scene: &Scene) -> Film {
+        let mut film = Film::new(scene.camera.resolution);
         let mut rng = StdRng::seed_from_u64(0);
 
         let t0 = std::time::Instant::now();
-        let img = RgbImage::from_fn(
-            scene.camera.resolution.x,
-            scene.camera.resolution.y,
-            |x, y| {
+        for y in 0..scene.camera.resolution.y {
+            for x in 0..scene.camera.resolution.x {
                 let p_raster = vec2(x as f32, y as f32);
-
-                let mut color_sum = Vec3::ZERO;
-                let mut weight_sum = 0.0;
 
                 for _ in 0..self.samples_per_pixel {
                     let p_film = p_raster + rng.gen::<Vec2>();
@@ -46,15 +42,11 @@ impl Renderer {
                     let ray = scene.camera.ray(&camera_sample);
 
                     if let Some(color) = self.pixel_color(scene, &ray, &mut rng, 0) {
-                        color_sum += color;
-                        weight_sum += 1.0;
+                        film.add_sample(p_film, color, 1.0);
                     }
                 }
-
-                let color = color_sum / weight_sum;
-                color_to_srgb(color)
-            },
-        );
+            }
+        }
         let elapsed = t0.elapsed();
 
         let rays = self.rays.load(Ordering::Relaxed);
@@ -66,7 +58,7 @@ impl Renderer {
             rays_per_sec.to_formatted_string(&Locale::en)
         );
 
-        img
+        film
     }
 
     fn pixel_color(
@@ -111,17 +103,6 @@ impl Renderer {
             }
         }
     }
-}
-
-fn color_to_srgb(color: Vec3) -> Rgb<u8> {
-    // "gamma 2" correction
-    let color = vec3(color.x.sqrt(), color.y.sqrt(), color.z.sqrt());
-
-    let ir = (255.0 * color.x.clamp(0.0, 1.0)) as u8;
-    let ig = (255.0 * color.y.clamp(0.0, 1.0)) as u8;
-    let ib = (255.0 * color.z.clamp(0.0, 1.0)) as u8;
-
-    Rgb([ir, ig, ib])
 }
 
 fn is_near_zero(v: Vec3) -> bool {

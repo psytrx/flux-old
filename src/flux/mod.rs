@@ -1,5 +1,6 @@
 mod accel;
 mod camera;
+mod film;
 mod interaction;
 mod ray;
 mod render;
