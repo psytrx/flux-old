@@ -3,6 +3,8 @@ mod camera;
 mod denoise;
 mod film;
 mod interaction;
+mod materials;
+mod primitive;
 mod ray;
 mod render;
 mod scene;
@@ -10,6 +12,8 @@ mod sphere;
 
 pub use camera::Camera;
 pub use denoise::Denoiser;
+pub use materials::*;
+pub use primitive::Primitive;
 pub use render::Renderer;
 pub use scene::Scene;
 pub use sphere::Sphere;

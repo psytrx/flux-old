@@ -7,7 +7,7 @@ use log::trace;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use super::{film::Film, ray::Ray, uniform_sample_sphere, CameraSample, Scene};
+use super::{film::Film, ray::Ray, CameraSample, Scene};
 
 pub struct Renderer {
     samples_per_pixel: u32,
@@ -128,18 +128,19 @@ impl Renderer {
                     // surface normal shading:
                     // Some((int.n + 1.0) / 2.0)
 
-                    let mut scattered_dir = int.n + uniform_sample_sphere(rng.gen());
-                    if is_near_zero(scattered_dir) {
-                        scattered_dir = int.n;
-                    }
-                    let scattered_ray = int.spawn_ray(scattered_dir);
+                    match int.primitive.material.scatter(ray, &int, rng) {
+                        Some(srec) => {
+                            let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
 
-                    let attenuation = Vec3::splat(0.5);
-                    let li = self.pixel_color(scene, &scattered_ray, rng, depth + 1);
-
-                    ColorResult {
-                        color: Some(attenuation * li.color.unwrap_or(Vec3::ONE)),
-                        rays: 1 + li.rays,
+                            ColorResult {
+                                color: Some(srec.attenuation * li.color.unwrap_or(Vec3::ONE)),
+                                rays: 1 + li.rays,
+                            }
+                        }
+                        None => ColorResult {
+                            color: Some(Vec3::ZERO),
+                            rays: 1,
+                        },
                     }
                 } else {
                     ColorResult {
@@ -160,9 +161,4 @@ struct ColorResult {
 pub struct RenderResult {
     pub film: Film,
     pub rays: usize,
-}
-
-fn is_near_zero(v: Vec3) -> bool {
-    let s = f32::EPSILON;
-    v.x.abs() < s && v.y.abs() < s && v.z.abs() < s
 }

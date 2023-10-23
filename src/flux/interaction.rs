@@ -1,16 +1,17 @@
 use glam::{vec3, Vec3};
 
-use super::ray::Ray;
+use super::{primitive::Primitive, ray::Ray};
 
-pub struct Interaction {
+pub struct Interaction<'a> {
     pub t: f32,
     pub p: Vec3,
     pub n: Vec3,
     pub front_face: bool,
     pub time: f32,
+    pub primitive: &'a Primitive,
 }
 
-impl Interaction {
+impl<'a> Interaction<'a> {
     pub fn spawn_ray(&self, direction: Vec3) -> Ray {
         let origin = offset_ray_origin(self.p, 8.0 * self.n);
         Ray::new(origin, direction, self.time)
