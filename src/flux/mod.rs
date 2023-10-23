@@ -5,33 +5,32 @@ mod ray;
 mod scene;
 mod sphere;
 
-use glam::{vec2, vec3, UVec2, Vec3};
+use glam::{vec2, vec3, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
 
-use self::{camera::Camera, list::ShapeList, ray::Ray, scene::Scene, sphere::Sphere};
+use self::ray::Ray;
 
-pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
-    let camera = Camera::new(resolution);
+pub use camera::*;
+pub use list::*;
+pub use scene::*;
+pub use sphere::*;
 
-    let aggregate = ShapeList::new(vec![
-        Sphere::new(vec3(0.0, 1.0, 0.0), 1.0),
-        Sphere::new(vec3(1.0, 0.25, -1.0), 0.25),
-        Sphere::new(vec3(0.0, -100.0, 0.0), 100.0),
-    ]);
+pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+    RgbImage::from_fn(
+        scene.camera.resolution.x,
+        scene.camera.resolution.y,
+        |x, y| {
+            let uv = vec2(
+                x as f32 / scene.camera.resolution.x as f32,
+                y as f32 / scene.camera.resolution.y as f32,
+            );
 
-    let scene = Scene { camera, aggregate };
+            let ray = scene.camera.ray(uv);
+            let color = pixel_color(scene, &ray);
 
-    RgbImage::from_fn(resolution.x, resolution.y, |x, y| {
-        let uv = vec2(
-            x as f32 / resolution.x as f32,
-            y as f32 / resolution.y as f32,
-        );
-
-        let ray = scene.camera.ray(uv);
-        let color = pixel_color(&scene, &ray);
-
-        color_to_rgb(color)
-    })
+            color_to_rgb(color)
+        },
+    )
 }
 
 fn pixel_color(scene: &Scene, ray: &Ray) -> Vec3 {

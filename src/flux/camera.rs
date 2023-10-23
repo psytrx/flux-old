@@ -3,7 +3,7 @@ use glam::{vec3, UVec2, Vec2};
 use super::ray::Ray;
 
 pub struct Camera {
-    resolution: UVec2,
+    pub resolution: UVec2,
 }
 
 impl Camera {
