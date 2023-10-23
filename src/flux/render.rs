@@ -41,7 +41,7 @@ fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: usize) -> Opti
         return None;
     }
 
-    match scene.aggregate.intersect(ray, f32::EPSILON..f32::INFINITY) {
+    match scene.intersect(ray, f32::EPSILON..f32::INFINITY) {
         None => {
             let unit_direction = ray.direction.normalize();
             let a = (unit_direction.y + 1.0) / 2.0;

@@ -1,5 +1,9 @@
 use std::ops::Range;
 
+use embree4_sys::{
+    rtcNewGeometry, rtcSetNewGeometryBuffer, RTCBufferType, RTCDevice, RTCFormat, RTCGeometry,
+    RTCGeometryType,
+};
 use glam::Vec3;
 
 use super::{interaction::Interaction, ray::Ray};
@@ -50,5 +54,23 @@ impl Sphere {
                 front_face,
             })
         }
+    }
+
+    pub unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
+        let geometry = rtcNewGeometry(device, RTCGeometryType::SPHERE_POINT);
+
+        let buffer_ptr = rtcSetNewGeometryBuffer(
+            geometry,
+            RTCBufferType::VERTEX,
+            0,
+            RTCFormat::FLOAT4,
+            4 * std::mem::size_of::<f32>(),
+            1,
+        );
+
+        let buffer = std::slice::from_raw_parts_mut(buffer_ptr as *mut f32, 4);
+        buffer.copy_from_slice(&[self.center.x, self.center.y, self.center.z, self.radius]);
+
+        geometry
     }
 }

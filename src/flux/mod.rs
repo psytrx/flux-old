@@ -1,3 +1,4 @@
+mod accel;
 mod camera;
 mod interaction;
 mod list;
@@ -6,14 +7,15 @@ mod render;
 mod scene;
 mod sphere;
 
-use std::f32::consts::PI;
-
 pub use camera::Camera;
-use glam::{vec3, Vec2, Vec3};
 pub use list::ShapeList;
 pub use render::render_image;
 pub use scene::Scene;
 pub use sphere::Sphere;
+
+use std::f32::consts::PI;
+
+use glam::{vec3, Vec2, Vec3};
 
 pub struct CameraSample {
     p_film: Vec2,
