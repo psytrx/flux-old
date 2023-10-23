@@ -2,3 +2,5 @@
 
 /output/*
 !/output/README.md
+
+/profile.json

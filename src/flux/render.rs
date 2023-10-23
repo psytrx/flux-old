@@ -6,8 +6,8 @@ use super::{random_unit_vector, ray::Ray, CameraSample, Scene};
 
 pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     let mut rng = StdRng::seed_from_u64(0);
-    let samples_per_pixel = 64;
-    let max_depth = 16;
+    let samples_per_pixel = 512;
+    let max_depth = 32;
 
     RgbImage::from_fn(
         scene.camera.resolution.x,
