@@ -39,10 +39,10 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
                 let camera_sample = CameraSample { p_film };
                 let ray = scene.camera.ray(&camera_sample);
 
-                let color = pixel_color(scene, &ray);
-
-                color_sum += color;
-                weight_sum += 1.0;
+                if let Some(color) = pixel_color(scene, &ray) {
+                    color_sum += color;
+                    weight_sum += 1.0;
+                }
             }
 
             let color = color_sum / weight_sum;
@@ -51,20 +51,20 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     )
 }
 
-fn pixel_color(scene: &Scene, ray: &Ray) -> Vec3 {
+fn pixel_color(scene: &Scene, ray: &Ray) -> Option<Vec3> {
     match scene.aggregate.intersect(ray, f32::EPSILON..f32::INFINITY) {
         None => {
             let unit_direction = ray.direction.normalize();
             let a = (unit_direction.y + 1.0) / 2.0;
             let horizon_color = vec3(0.5, 0.7, 1.0);
             let zenith_color = vec3(1.0, 1.0, 1.0);
-            (1.0 - a) * zenith_color + a * horizon_color
+            Some((1.0 - a) * zenith_color + a * horizon_color)
         }
         Some(int) => {
             if int.front_face {
-                (int.n + 1.0) / 2.0
+                Some((int.n + 1.0) / 2.0)
             } else {
-                Vec3::ZERO
+                None
             }
         }
     }
