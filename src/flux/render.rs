@@ -1,7 +1,4 @@
-use std::sync::{
-    atomic::{AtomicUsize, Ordering},
-    Arc, Mutex,
-};
+use std::sync::{Arc, Mutex};
 
 use glam::{vec2, vec3, UVec2, Vec2, Vec3};
 
@@ -16,7 +13,6 @@ pub struct Renderer {
     samples_per_pixel: u32,
     max_depth: u32,
     num_passes: u64,
-    pub rays: AtomicUsize,
 }
 
 impl Renderer {
@@ -25,7 +21,6 @@ impl Renderer {
             samples_per_pixel,
             max_depth,
             num_passes,
-            rays: AtomicUsize::new(0),
         }
     }
 
@@ -36,7 +31,7 @@ impl Renderer {
             .map(|pass| self.render_pass(scene, pass));
 
         let merged_film = Arc::new(Mutex::new(Film::new(scene.camera.resolution)));
-        let passes_merged = AtomicUsize::new(0);
+        let passes_merged = Arc::new(Mutex::new(0));
         let last_update = Arc::new(Mutex::new(std::time::Instant::now()));
 
         let num_cpus = num_cpus::get();
@@ -45,9 +40,10 @@ impl Renderer {
             let mut merged_film = merged_film.lock().unwrap();
             merged_film.merge_tile(UVec2::ZERO, result.film);
 
-            let passes_merged = 1 + passes_merged.fetch_add(1, Ordering::SeqCst);
+            let mut passes_merged = passes_merged.lock().unwrap();
+            *passes_merged += 1;
 
-            if passes_merged % num_cpus == 0 {
+            if *passes_merged % num_cpus == 0 {
                 let mut last_update = last_update.lock().unwrap();
                 if last_update.elapsed() > std::time::Duration::from_secs(1) {
                     merged_film
@@ -56,7 +52,7 @@ impl Renderer {
                         .unwrap();
                     *last_update = std::time::Instant::now();
 
-                    let progress = 100.0 * (passes_merged as f32 / self.num_passes as f32);
+                    let progress = 100.0 * (*passes_merged as f32 / self.num_passes as f32);
                     trace!(
                         "{} / {} ({:>6.3}%)",
                         passes_merged,
@@ -104,7 +100,6 @@ impl Renderer {
             return None;
         }
 
-        self.rays.fetch_add(1, Ordering::Relaxed);
         match scene.intersect(ray) {
             None => {
                 let unit_direction = ray.direction.normalize();
