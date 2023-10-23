@@ -1,9 +1,10 @@
 mod ray;
+mod sphere;
 
 use glam::{vec2, vec3, UVec2, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
 
-use self::ray::Ray;
+use self::{ray::Ray, sphere::Sphere};
 
 pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     let look_from = vec3(0.0, 0.0, -4.0);
@@ -31,11 +32,17 @@ pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
 }
 
 fn pixel_color(ray: &Ray) -> Vec3 {
-    let unit_direction = ray.direction.normalize();
-    let a = (unit_direction.y + 1.0) / 2.0;
-    let horizon_color = vec3(0.5, 0.7, 1.0);
-    let zenith_color = vec3(1.0, 1.0, 1.0);
-    (1.0 - a) * zenith_color + a * horizon_color
+    let sphere = Sphere::new(Vec3::ZERO, 1.0);
+
+    if sphere.hit(ray) {
+        Vec3::X
+    } else {
+        let unit_direction = ray.direction.normalize();
+        let a = (unit_direction.y + 1.0) / 2.0;
+        let horizon_color = vec3(0.5, 0.7, 1.0);
+        let zenith_color = vec3(1.0, 1.0, 1.0);
+        (1.0 - a) * zenith_color + a * horizon_color
+    }
 }
 
 fn color_to_rgb(color: Vec3) -> Rgb<u8> {
