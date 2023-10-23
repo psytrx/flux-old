@@ -2,7 +2,7 @@ use glam::{vec2, vec3, Vec2, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
-use super::{random_unit_vector, ray::Ray, CameraSample, Scene};
+use super::{ray::Ray, uniform_sample_sphere, CameraSample, Scene};
 
 pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     let mut rng = StdRng::seed_from_u64(0);
@@ -54,7 +54,7 @@ fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: usize) -> Opti
                 // surface normal shading:
                 // Some((int.n + 1.0) / 2.0)
 
-                let mut scattered_dir = int.n + random_unit_vector(rng);
+                let mut scattered_dir = int.n + uniform_sample_sphere(rng.gen());
                 if is_near_zero(scattered_dir) {
                     scattered_dir = int.n;
                 }

@@ -6,10 +6,11 @@ mod render;
 mod scene;
 mod sphere;
 
+use std::f32::consts::PI;
+
 pub use camera::Camera;
-use glam::{Vec2, Vec3};
+use glam::{vec3, Vec2, Vec3};
 pub use list::ShapeList;
-use rand::{rngs::StdRng, Rng};
 pub use render::render_image;
 pub use scene::Scene;
 pub use sphere::Sphere;
@@ -18,15 +19,13 @@ pub struct CameraSample {
     p_film: Vec2,
 }
 
-pub fn random_unit_vector(rng: &mut StdRng) -> Vec3 {
-    random_in_unit_sphere(rng).normalize()
-}
+pub fn uniform_sample_sphere(u: Vec2) -> Vec3 {
+    let z = 1.0 - 2.0 * u.x;
 
-fn random_in_unit_sphere(rng: &mut StdRng) -> Vec3 {
-    loop {
-        let p = rng.gen::<Vec3>() * 2.0 - 1.0;
-        if p.length_squared() < 1.0 {
-            return p;
-        }
-    }
+    let r = (1.0 - z.powi(2)).max(0.0).sqrt();
+    let phi = 2.0 * PI * u.y;
+    let x = r * phi.cos();
+    let y = r * phi.sin();
+
+    vec3(x, y, z)
 }
