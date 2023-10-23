@@ -1,4 +1,4 @@
-use std::{ops::Range, ptr::null_mut};
+use std::ptr::null_mut;
 
 use embree4_sys::{rtcIntersect1, RTCRay, RTCRayHit, RTC_INVALID_GEOMETRY_ID};
 use glam::vec3;
@@ -16,18 +16,18 @@ impl Scene {
         Self { camera, accel }
     }
 
-    pub fn intersect(&self, ray: &Ray, t: Range<f32>) -> Option<Interaction> {
+    pub fn intersect(&self, ray: &Ray) -> Option<Interaction> {
         let mut ray_hit = RTCRayHit {
             ray: RTCRay {
                 org_x: ray.origin.x,
                 org_y: ray.origin.y,
                 org_z: ray.origin.z,
-                tnear: t.start,
+                tnear: f32::EPSILON,
                 dir_x: ray.direction.x,
                 dir_y: ray.direction.y,
                 dir_z: ray.direction.z,
                 time: 0.0,
-                tfar: t.end,
+                tfar: f32::INFINITY,
                 ..Default::default()
             },
             hit: Default::default(),

@@ -81,7 +81,7 @@ impl Renderer {
         }
 
         self.rays.fetch_add(1, Ordering::Relaxed);
-        match scene.intersect(ray, f32::EPSILON..f32::INFINITY) {
+        match scene.intersect(ray) {
             None => {
                 let unit_direction = ray.direction.normalize();
                 let a = (unit_direction.y + 1.0) / 2.0;
