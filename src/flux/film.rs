@@ -1,6 +1,7 @@
 use glam::{vec3, UVec2, Vec2, Vec3};
 use image::{Rgb, RgbImage};
 
+#[derive(Debug)]
 pub struct Film {
     resolution: UVec2,
     pixels: Vec<Pixel>,
@@ -38,6 +39,17 @@ impl Film {
         pixel.weight_sum += sample_weight;
     }
 
+    pub fn merge_tile(&mut self, p0: UVec2, tile: Film) {
+        for y in 0..tile.resolution.y {
+            for x in 0..tile.resolution.x {
+                let tile_pixel = tile.pixel(x, y);
+                let local_pixel = self.pixel_mut(p0.x + x, p0.y + y);
+                local_pixel.color_sum += tile_pixel.color_sum;
+                local_pixel.weight_sum += tile_pixel.weight_sum;
+            }
+        }
+    }
+
     pub fn to_srgb_image(&self) -> RgbImage {
         RgbImage::from_fn(self.resolution.x, self.resolution.y, |x, y| {
             let pixel = self.pixel(x, y);
@@ -58,7 +70,7 @@ fn color_to_srgb(color: Vec3) -> Rgb<u8> {
     Rgb([ir, ig, ib])
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Pixel {
     color_sum: Vec3,
     weight_sum: f32,

@@ -14,7 +14,9 @@ image = "0.24.7"
 log = "0.4.20"
 measure_time = "0.8.2"
 num-format = "0.4.4"
+num_cpus = "1.16.0"
 rand = "0.8.5"
+rayon = "1.8.0"
 
 [profile.profiling]
 inherits = "release"

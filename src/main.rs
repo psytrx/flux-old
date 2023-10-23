@@ -14,9 +14,9 @@ fn main() -> Result<()> {
     trace_time!("main");
 
     let scene = load_scene();
-    let renderer = Renderer::new(64);
-    let film = renderer.render_film(&scene);
-    let img = film.to_srgb_image();
+    let renderer = Renderer::new(4, 16, 128);
+    let result = renderer.render_film(&scene);
+    let img = result.film.to_srgb_image();
     img.save("./output/output.png")?;
 
     Ok(())

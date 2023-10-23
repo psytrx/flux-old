@@ -10,6 +10,11 @@ pub struct Scene {
     pub accel: EmbreeAccel,
 }
 
+// TODO: This is currently required for the progressive renderer to share the scene between
+// threads. However, we may be able to clone it. Take care about the shared resources between
+// the Embree API, since it counts references and can't know we copied/cloned the reference.
+unsafe impl Sync for Scene {}
+
 impl Scene {
     pub fn new(camera: Camera, aggregate: Vec<Sphere>) -> Self {
         let accel = unsafe { EmbreeAccel::build(aggregate) };

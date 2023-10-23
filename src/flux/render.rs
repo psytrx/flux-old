@@ -1,46 +1,78 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc, Mutex,
+};
 
-use glam::{vec2, vec3, Vec2, Vec3};
+use glam::{vec2, vec3, UVec2, Vec2, Vec3};
 
-use log::debug;
-use num_format::{Locale, ToFormattedString};
+use log::trace;
+
 use rand::{rngs::StdRng, Rng, SeedableRng};
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
 use super::{film::Film, ray::Ray, uniform_sample_sphere, CameraSample, Scene};
 
 pub struct Renderer {
-    samples_per_pixel: usize,
-    max_depth: usize,
-    rays: AtomicUsize,
+    samples_per_pixel: u32,
+    max_depth: u32,
+    num_passes: u64,
+    pub rays: AtomicUsize,
 }
 
 impl Renderer {
-    pub fn new(samples_per_pixel: usize) -> Self {
+    pub fn new(samples_per_pixel: u32, max_depth: u32, num_passes: u64) -> Self {
         Self {
             samples_per_pixel,
-            max_depth: 16,
+            max_depth,
+            num_passes,
             rays: AtomicUsize::new(0),
         }
     }
 
-    pub fn render_film(&self, scene: &Scene) -> Film {
-        let t0 = std::time::Instant::now();
-        let film = self.render_pass(scene, 0);
-        let elapsed = t0.elapsed();
+    pub fn render_film(&self, scene: &Scene) -> RenderResult {
+        let finished_passes = (0..self.num_passes)
+            .collect::<Vec<_>>()
+            .into_par_iter()
+            .map(|pass| self.render_pass(scene, pass));
 
-        let rays = self.rays.load(Ordering::Relaxed);
-        debug!("rays:     {:>16}", rays.to_formatted_string(&Locale::en));
+        let merged_film = Arc::new(Mutex::new(Film::new(scene.camera.resolution)));
+        let passes_merged = AtomicUsize::new(0);
+        let last_update = Arc::new(Mutex::new(std::time::Instant::now()));
 
-        let rays_per_sec = (rays as f32 / elapsed.as_secs_f32()) as usize;
-        debug!(
-            "rays/sec: {:>16}",
-            rays_per_sec.to_formatted_string(&Locale::en)
-        );
+        let num_cpus = num_cpus::get();
 
-        film
+        finished_passes.for_each(|result| {
+            let mut merged_film = merged_film.lock().unwrap();
+            merged_film.merge_tile(UVec2::ZERO, result.film);
+
+            let passes_merged = 1 + passes_merged.fetch_add(1, Ordering::SeqCst);
+
+            if passes_merged % num_cpus == 0 {
+                let mut last_update = last_update.lock().unwrap();
+                if last_update.elapsed() > std::time::Duration::from_secs(1) {
+                    merged_film
+                        .to_srgb_image()
+                        .save("./output/output.png")
+                        .unwrap();
+                    *last_update = std::time::Instant::now();
+
+                    let progress = 100.0 * (passes_merged as f32 / self.num_passes as f32);
+                    trace!(
+                        "{} / {} ({:>6.3}%)",
+                        passes_merged,
+                        self.num_passes,
+                        progress
+                    );
+                }
+            }
+        });
+
+        let film = Arc::try_unwrap(merged_film).unwrap().into_inner().unwrap();
+
+        RenderResult { film }
     }
 
-    fn render_pass(&self, scene: &Scene, pass: u64) -> Film {
+    fn render_pass(&self, scene: &Scene, pass: u64) -> RenderResult {
         let mut film = Film::new(scene.camera.resolution);
         let mut rng = StdRng::seed_from_u64(pass);
 
@@ -64,16 +96,10 @@ impl Renderer {
             }
         }
 
-        film
+        RenderResult { film }
     }
 
-    fn pixel_color(
-        &self,
-        scene: &Scene,
-        ray: &Ray,
-        rng: &mut StdRng,
-        depth: usize,
-    ) -> Option<Vec3> {
+    fn pixel_color(&self, scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: u32) -> Option<Vec3> {
         if depth > self.max_depth {
             return None;
         }
@@ -109,6 +135,10 @@ impl Renderer {
             }
         }
     }
+}
+
+pub struct RenderResult {
+    pub film: Film,
 }
 
 fn is_near_zero(v: Vec3) -> bool {
