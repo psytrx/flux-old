@@ -7,7 +7,7 @@ mod scene;
 mod sphere;
 
 pub use camera::Camera;
-pub use render::render_image;
+pub use render::Renderer;
 pub use scene::Scene;
 pub use sphere::Sphere;
 

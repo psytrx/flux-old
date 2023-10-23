@@ -7,14 +7,15 @@ use flux::{Camera, Scene, Sphere};
 use glam::{uvec2, vec3};
 use measure_time::trace_time;
 
-use crate::flux::render_image;
+use crate::flux::Renderer;
 
 fn main() -> Result<()> {
     env_logger::init();
     trace_time!("main");
 
     let scene = load_scene();
-    let img = render_image(&scene);
+    let renderer = Renderer::new(64);
+    let img = renderer.render_image(&scene);
     img.save("./output/output.png")?;
 
     Ok(())
