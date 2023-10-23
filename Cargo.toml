@@ -7,5 +7,8 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
+env_logger = "0.10.0"
 glam = "0.24.2"
 image = "0.24.7"
+log = "0.4.20"
+measure_time = "0.8.2"
