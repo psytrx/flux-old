@@ -5,7 +5,9 @@ mod flux;
 use anyhow::Result;
 use flux::{Camera, Scene, Sphere};
 use glam::{uvec2, vec3};
+use log::debug;
 use measure_time::trace_time;
+use num_format::{Locale, ToFormattedString};
 
 use crate::flux::Renderer;
 
@@ -19,9 +21,22 @@ fn main() -> Result<()> {
 
     let scene = load_scene();
     let renderer = Renderer::new(1, 16, num_passes);
+
+    let t0 = std::time::Instant::now();
     let result = renderer.render_film(&scene);
-    let img = result.film.to_srgb_image();
-    img.save("./output/output.png")?;
+    let elapsed = t0.elapsed();
+
+    debug!(
+        "rays:     {:>16}",
+        result.rays.to_formatted_string(&Locale::en)
+    );
+    let rays_per_sec = (result.rays as f64 / elapsed.as_secs_f64()) as usize;
+    debug!(
+        "rays/sec: {:>16}",
+        rays_per_sec.to_formatted_string(&Locale::en)
+    );
+
+    result.film.to_srgb_image().save("./output/output.png")?;
 
     Ok(())
 }

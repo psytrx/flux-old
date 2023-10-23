@@ -33,6 +33,7 @@ impl Renderer {
         let merged_film = Arc::new(Mutex::new(Film::new(scene.camera.resolution)));
         let passes_merged = Arc::new(Mutex::new(0));
         let last_update = Arc::new(Mutex::new(std::time::Instant::now()));
+        let rays = Arc::new(Mutex::new(0));
 
         let num_cpus = num_cpus::get();
 
@@ -42,6 +43,9 @@ impl Renderer {
 
             let mut passes_merged = passes_merged.lock().unwrap();
             *passes_merged += 1;
+
+            let mut rays = rays.lock().unwrap();
+            *rays += result.rays;
 
             if *passes_merged % num_cpus == 0 {
                 let mut last_update = last_update.lock().unwrap();
@@ -64,13 +68,15 @@ impl Renderer {
         });
 
         let film = Arc::try_unwrap(merged_film).unwrap().into_inner().unwrap();
+        let rays = Arc::try_unwrap(rays).unwrap().into_inner().unwrap();
 
-        RenderResult { film }
+        RenderResult { film, rays }
     }
 
     fn render_pass(&self, scene: &Scene, pass: usize) -> RenderResult {
         let mut film = Film::new(scene.camera.resolution);
         let mut rng = StdRng::seed_from_u64(pass.try_into().unwrap());
+        let mut rays = 0;
 
         for y in 0..scene.camera.resolution.y {
             for x in 0..scene.camera.resolution.x {
@@ -85,19 +91,25 @@ impl Renderer {
                     };
                     let ray = scene.camera.ray(&camera_sample);
 
-                    if let Some(color) = self.pixel_color(scene, &ray, &mut rng, 0) {
+                    let li = self.pixel_color(scene, &ray, &mut rng, 0);
+                    if let Some(color) = li.color {
                         film.add_sample(p_film, color, 1.0);
                     }
+
+                    rays += li.rays;
                 }
             }
         }
 
-        RenderResult { film }
+        RenderResult { film, rays }
     }
 
-    fn pixel_color(&self, scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: u32) -> Option<Vec3> {
+    fn pixel_color(&self, scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: u32) -> ColorResult {
         if depth > self.max_depth {
-            return None;
+            return ColorResult {
+                color: None,
+                rays: 0,
+            };
         }
 
         match scene.intersect(ray) {
@@ -106,7 +118,10 @@ impl Renderer {
                 let a = (unit_direction.y + 1.0) / 2.0;
                 let horizon_color = vec3(0.5, 0.7, 1.0);
                 let zenith_color = vec3(1.0, 1.0, 1.0);
-                Some((1.0 - a) * zenith_color + a * horizon_color)
+                ColorResult {
+                    color: Some((1.0 - a) * zenith_color + a * horizon_color),
+                    rays: 1,
+                }
             }
             Some(int) => {
                 if int.front_face {
@@ -120,20 +135,31 @@ impl Renderer {
                     let scattered_ray = int.spawn_ray(scattered_dir);
 
                     let attenuation = Vec3::splat(0.5);
-                    match self.pixel_color(scene, &scattered_ray, rng, depth + 1) {
-                        Some(li) => Some(attenuation * li),
-                        None => Some(attenuation),
+                    let li = self.pixel_color(scene, &scattered_ray, rng, depth + 1);
+
+                    ColorResult {
+                        color: Some(attenuation * li.color.unwrap_or(Vec3::ONE)),
+                        rays: 1 + li.rays,
                     }
                 } else {
-                    None
+                    ColorResult {
+                        color: None,
+                        rays: 1,
+                    }
                 }
             }
         }
     }
 }
 
+struct ColorResult {
+    color: Option<Vec3>,
+    rays: usize,
+}
+
 pub struct RenderResult {
     pub film: Film,
+    pub rays: usize,
 }
 
 fn is_near_zero(v: Vec3) -> bool {
