@@ -26,9 +26,9 @@ impl Sphere {
         } else {
             let sqrt_d = discriminant.sqrt();
             let mut root = (-half_b - sqrt_d) / a;
-            if root < t.start || root > t.end {
+            if !t.contains(&root) {
                 root = (-half_b + sqrt_d) / a;
-                if root < t.start || root > t.end {
+                if !t.contains(&root) {
                     return None;
                 }
             }
