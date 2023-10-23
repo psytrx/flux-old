@@ -2,7 +2,7 @@ use glam::{vec2, vec3, Vec2, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
-use super::{ray::Ray, CameraSample, Scene};
+use super::{random_unit_vector, ray::Ray, CameraSample, Scene};
 
 pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     let mut rng = StdRng::seed_from_u64(0);
@@ -23,7 +23,7 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
                 let camera_sample = CameraSample { p_film };
                 let ray = scene.camera.ray(&camera_sample);
 
-                if let Some(color) = pixel_color(scene, &ray) {
+                if let Some(color) = pixel_color(scene, &ray, &mut rng) {
                     color_sum += color;
                     weight_sum += 1.0;
                 }
@@ -35,7 +35,7 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     )
 }
 
-fn pixel_color(scene: &Scene, ray: &Ray) -> Option<Vec3> {
+fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng) -> Option<Vec3> {
     match scene.aggregate.intersect(ray, f32::EPSILON..f32::INFINITY) {
         None => {
             let unit_direction = ray.direction.normalize();
@@ -46,7 +46,20 @@ fn pixel_color(scene: &Scene, ray: &Ray) -> Option<Vec3> {
         }
         Some(int) => {
             if int.front_face {
-                Some((int.n + 1.0) / 2.0)
+                // surface normal shading:
+                // Some((int.n + 1.0) / 2.0)
+
+                let mut scattered_dir = int.n + random_unit_vector(rng);
+                if is_near_zero(scattered_dir) {
+                    scattered_dir = int.n;
+                }
+                let scattered_ray = Ray::new(int.p, scattered_dir);
+
+                let attenuation = Vec3::splat(0.5);
+                match pixel_color(scene, &scattered_ray, rng) {
+                    Some(li) => Some(attenuation * li),
+                    None => Some(attenuation),
+                }
             } else {
                 None
             }
@@ -60,4 +73,9 @@ fn color_to_rgb(color: Vec3) -> Rgb<u8> {
     let ib = (255.0 * color.z.clamp(0.0, 1.0)) as u8;
 
     Rgb([ir, ig, ib])
+}
+
+fn is_near_zero(v: Vec3) -> bool {
+    let s = f32::EPSILON;
+    v.x.abs() < s && v.y.abs() < s && v.z.abs() < s
 }
