@@ -100,10 +100,7 @@ impl Renderer {
                     let ray = scene.camera.ray(&camera_sample);
 
                     let li = self.pixel_color(scene, &ray, &mut rng, 0);
-                    if let Some(color) = li.color {
-                        film.add_sample(p_film, color, 1.0);
-                    }
-
+                    film.add_sample(p_film, li.color, 1.0);
                     rays += li.rays;
                 }
             }
@@ -115,7 +112,7 @@ impl Renderer {
     fn pixel_color(&self, scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: u32) -> ColorResult {
         if depth > self.max_depth {
             return ColorResult {
-                color: None,
+                color: Vec3::ZERO,
                 rays: 0,
             };
         }
@@ -125,7 +122,7 @@ impl Renderer {
             let q: f32 = rng.gen();
             if q < prob {
                 return ColorResult {
-                    color: None,
+                    color: Vec3::ZERO,
                     rays: 0,
                 };
             }
@@ -134,6 +131,7 @@ impl Renderer {
             1.0
         };
 
+        let rays = 1;
         match scene.intersect(ray) {
             None => {
                 let unit_direction = ray.direction.normalize();
@@ -142,44 +140,35 @@ impl Renderer {
                 let zenith_color = vec3(1.0, 1.0, 1.0);
                 let color = (1.0 - a) * zenith_color + a * horizon_color;
                 ColorResult {
-                    color: Some(rr_factor * color),
-                    rays: 1,
+                    color: rr_factor * color,
+                    rays,
                 }
             }
-            Some(int) => {
-                if int.front_face {
-                    // surface normal shading:
-                    // Some((int.n + 1.0) / 2.0)
-
-                    match int.primitive.material.scatter(ray, &int, rng) {
-                        Some(srec) => {
-                            let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
-
-                            ColorResult {
-                                color: Some(
-                                    rr_factor * srec.attenuation * li.color.unwrap_or(Vec3::ONE),
-                                ),
-                                rays: 1 + li.rays,
-                            }
+            Some(int) => match int.primitive.material.scatter(ray, &int, rng) {
+                Some(srec) => match srec.scattered {
+                    Some(scattered) => {
+                        let li = self.pixel_color(scene, &scattered, rng, depth + 1);
+                        ColorResult {
+                            color: rr_factor * srec.attenuation * li.color,
+                            rays: rays + li.rays,
                         }
-                        None => ColorResult {
-                            color: Some(Vec3::ZERO),
-                            rays: 1,
-                        },
                     }
-                } else {
-                    ColorResult {
-                        color: None,
-                        rays: 1,
-                    }
-                }
-            }
+                    None => ColorResult {
+                        color: Vec3::ZERO,
+                        rays,
+                    },
+                },
+                None => ColorResult {
+                    color: Vec3::ZERO,
+                    rays,
+                },
+            },
         }
     }
 }
 
 struct ColorResult {
-    color: Option<Vec3>,
+    color: Vec3,
     rays: usize,
 }
 

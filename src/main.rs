@@ -16,7 +16,7 @@ use crate::{
 fn main() -> Result<()> {
     env_logger::init();
 
-    let sweeps = 4;
+    let sweeps = 1;
     let num_cpus = num_cpus::get();
     let num_passes = sweeps * num_cpus;
 
@@ -25,7 +25,7 @@ fn main() -> Result<()> {
         load_example_scene(ExampleScene::MaterialDemo)
     };
 
-    let renderer = Renderer::new(16, 4, 16, 0.1, num_passes);
+    let renderer = Renderer::new(4, 4, 16, 0.1, num_passes);
 
     let t0 = std::time::Instant::now();
     let result = {

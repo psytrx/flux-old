@@ -12,10 +12,10 @@ impl Camera {
     }
 
     pub fn ray(&self, sample: &CameraSample) -> Ray {
-        let look_from = vec3(0.0, 1.0, -4.0);
+        let look_from = vec3(0.0, 1.5, -4.0);
         let viewport_width = 6.0;
         let viewport_height = viewport_width / self.resolution.x as f32 * self.resolution.y as f32;
-        let top_left = vec3(-viewport_width / 2.0, viewport_height / 2.0, 0.0);
+        let top_left = vec3(-viewport_width / 2.0, viewport_height / 2.0 + 0.5, 0.0);
         let horizontal = vec3(viewport_width, 0.0, 0.0);
         let vertical = vec3(0.0, -viewport_height, 0.0);
 
