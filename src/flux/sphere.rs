@@ -32,8 +32,15 @@ impl Sphere {
             }
 
             let p = ray.at(t);
-            let n = (p - self.center) / self.radius;
-            Some(Interaction { p, n })
+            let outward_normal = (p - self.center) / self.radius;
+            let front_face = ray.direction.dot(outward_normal) < 0.0;
+            let n = if front_face {
+                outward_normal
+            } else {
+                -outward_normal
+            };
+
+            Some(Interaction { p, n, front_face })
         }
     }
 }

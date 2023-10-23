@@ -43,7 +43,13 @@ fn pixel_color(ray: &Ray) -> Vec3 {
             let zenith_color = vec3(1.0, 1.0, 1.0);
             (1.0 - a) * zenith_color + a * horizon_color
         }
-        Some(int) => (int.n + 1.0) / 2.0,
+        Some(int) => {
+            if int.front_face {
+                (int.n + 1.0) / 2.0
+            } else {
+                Vec3::ZERO
+            }
+        }
     }
 }
 
