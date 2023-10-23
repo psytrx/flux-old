@@ -10,7 +10,7 @@ fn main() -> Result<()> {
     env_logger::init();
     trace_time!("main");
 
-    let resolution = uvec2(800, 600);
+    let resolution = uvec2(800, 450);
     let img = render_image(resolution);
     img.save("./output/output.png")?;
 
