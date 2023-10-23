@@ -11,15 +11,25 @@ use super::{film::Film, ray::Ray, CameraSample, Scene};
 
 pub struct Renderer {
     samples_per_pixel: u32,
+    min_depth: u32,
     max_depth: u32,
+    rr_stop_prob: f32,
     num_passes: usize,
 }
 
 impl Renderer {
-    pub fn new(samples_per_pixel: u32, max_depth: u32, num_passes: usize) -> Self {
+    pub fn new(
+        samples_per_pixel: u32,
+        min_depth: u32,
+        max_depth: u32,
+        rr_stop_prob: f32,
+        num_passes: usize,
+    ) -> Self {
         Self {
             samples_per_pixel,
+            min_depth,
             max_depth,
+            rr_stop_prob,
             num_passes,
         }
     }
@@ -110,14 +120,29 @@ impl Renderer {
             };
         }
 
+        let rr_factor = if depth >= self.min_depth {
+            let prob = 1.0 - self.rr_stop_prob;
+            let q: f32 = rng.gen();
+            if q < prob {
+                return ColorResult {
+                    color: None,
+                    rays: 0,
+                };
+            }
+            1.0 / prob
+        } else {
+            1.0
+        };
+
         match scene.intersect(ray) {
             None => {
                 let unit_direction = ray.direction.normalize();
                 let a = (unit_direction.y + 1.0) / 2.0;
                 let horizon_color = vec3(0.5, 0.7, 1.0);
                 let zenith_color = vec3(1.0, 1.0, 1.0);
+                let color = (1.0 - a) * zenith_color + a * horizon_color;
                 ColorResult {
-                    color: Some((1.0 - a) * zenith_color + a * horizon_color),
+                    color: Some(rr_factor * color),
                     rays: 1,
                 }
             }
@@ -131,7 +156,9 @@ impl Renderer {
                             let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
 
                             ColorResult {
-                                color: Some(srec.attenuation * li.color.unwrap_or(Vec3::ONE)),
+                                color: Some(
+                                    rr_factor * srec.attenuation * li.color.unwrap_or(Vec3::ONE),
+                                ),
                                 rays: 1 + li.rays,
                             }
                         }

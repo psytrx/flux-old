@@ -25,7 +25,7 @@ fn main() -> Result<()> {
         load_example_scene(ExampleScene::MaterialDemo)
     };
 
-    let renderer = Renderer::new(16, 16, num_passes);
+    let renderer = Renderer::new(16, 4, 16, 0.1, num_passes);
 
     let t0 = std::time::Instant::now();
     let result = {
