@@ -1,3 +1,5 @@
+#![feature(float_next_up_down)]
+
 mod flux;
 
 use anyhow::Result;

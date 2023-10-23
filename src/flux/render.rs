@@ -58,7 +58,7 @@ fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: usize) -> Opti
                 if is_near_zero(scattered_dir) {
                     scattered_dir = int.n;
                 }
-                let scattered_ray = Ray::new(int.p, scattered_dir);
+                let scattered_ray = int.spawn_ray(scattered_dir);
 
                 let attenuation = Vec3::splat(0.5);
                 match pixel_color(scene, &scattered_ray, rng, depth - 1) {
