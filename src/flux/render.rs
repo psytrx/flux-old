@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use glam::{vec2, vec3, UVec2, Vec2, Vec3};
 
-use log::trace;
+use log::debug;
 
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
@@ -57,11 +57,9 @@ impl Renderer {
                     *last_update = std::time::Instant::now();
 
                     let progress = 100.0 * (*passes_merged as f32 / self.num_passes as f32);
-                    trace!(
+                    debug!(
                         "{} / {} ({:>6.3}%)",
-                        passes_merged,
-                        self.num_passes,
-                        progress
+                        passes_merged, self.num_passes, progress
                     );
                 }
             }
