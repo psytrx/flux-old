@@ -1,6 +1,6 @@
-use glam::{vec3, UVec2, Vec2};
+use glam::{vec3, UVec2};
 
-use super::ray::Ray;
+use super::{ray::Ray, CameraSample};
 
 pub struct Camera {
     pub resolution: UVec2,
@@ -11,7 +11,7 @@ impl Camera {
         Self { resolution }
     }
 
-    pub fn ray(&self, uv: Vec2) -> Ray {
+    pub fn ray(&self, sample: &CameraSample) -> Ray {
         let look_from = vec3(0.0, 1.0, -4.0);
         let viewport_width = 6.0;
         let viewport_height = viewport_width / self.resolution.x as f32 * self.resolution.y as f32;
@@ -20,8 +20,11 @@ impl Camera {
         let vertical = vec3(0.0, -viewport_height, 0.0);
 
         let origin = look_from;
+
+        let uv = sample.p_film / self.resolution.as_vec2();
         let target = top_left + horizontal * uv.x + vertical * uv.y;
         let direction = target - origin;
+
         Ray::new(origin, direction)
     }
 }

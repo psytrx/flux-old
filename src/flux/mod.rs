@@ -5,8 +5,9 @@ mod ray;
 mod scene;
 mod sphere;
 
-use glam::{vec2, vec3, Vec3};
+use glam::{vec2, vec3, Vec2, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use self::ray::Ray;
 
@@ -15,19 +16,36 @@ pub use list::*;
 pub use scene::*;
 pub use sphere::*;
 
+pub struct CameraSample {
+    p_film: Vec2,
+}
+
 pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+    let mut rng = StdRng::seed_from_u64(0);
+    let samples_per_pixel = 64;
+
     RgbImage::from_fn(
         scene.camera.resolution.x,
         scene.camera.resolution.y,
         |x, y| {
-            let uv = vec2(
-                x as f32 / scene.camera.resolution.x as f32,
-                y as f32 / scene.camera.resolution.y as f32,
-            );
+            let p_raster = vec2(x as f32, y as f32);
 
-            let ray = scene.camera.ray(uv);
-            let color = pixel_color(scene, &ray);
+            let mut color_sum = Vec3::ZERO;
+            let mut weight_sum = 0.0;
 
+            for _ in 0..samples_per_pixel {
+                let p_film = p_raster + rng.gen::<Vec2>();
+
+                let camera_sample = CameraSample { p_film };
+                let ray = scene.camera.ray(&camera_sample);
+
+                let color = pixel_color(scene, &ray);
+
+                color_sum += color;
+                weight_sum += 1.0;
+            }
+
+            let color = color_sum / weight_sum;
             color_to_rgb(color)
         },
     )
