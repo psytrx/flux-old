@@ -71,9 +71,9 @@ fn pixel_color(scene: &Scene, ray: &Ray) -> Vec3 {
 }
 
 fn color_to_rgb(color: Vec3) -> Rgb<u8> {
-    let ir = (255.999 * color.x) as u8;
-    let ig = (255.999 * color.y) as u8;
-    let ib = (255.999 * color.z) as u8;
+    let ir = (255.0 * color.x.clamp(0.0, 1.0)) as u8;
+    let ig = (255.0 * color.y.clamp(0.0, 1.0)) as u8;
+    let ib = (255.0 * color.z.clamp(0.0, 1.0)) as u8;
 
     Rgb([ir, ig, ib])
 }
