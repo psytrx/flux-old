@@ -7,6 +7,7 @@ use super::{random_unit_vector, ray::Ray, CameraSample, Scene};
 pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     let mut rng = StdRng::seed_from_u64(0);
     let samples_per_pixel = 64;
+    let max_depth = 16;
 
     RgbImage::from_fn(
         scene.camera.resolution.x,
@@ -23,7 +24,7 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
                 let camera_sample = CameraSample { p_film };
                 let ray = scene.camera.ray(&camera_sample);
 
-                if let Some(color) = pixel_color(scene, &ray, &mut rng) {
+                if let Some(color) = pixel_color(scene, &ray, &mut rng, max_depth) {
                     color_sum += color;
                     weight_sum += 1.0;
                 }
@@ -35,7 +36,11 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     )
 }
 
-fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng) -> Option<Vec3> {
+fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: usize) -> Option<Vec3> {
+    if depth == 0 {
+        return None;
+    }
+
     match scene.aggregate.intersect(ray, f32::EPSILON..f32::INFINITY) {
         None => {
             let unit_direction = ray.direction.normalize();
@@ -56,7 +61,7 @@ fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng) -> Option<Vec3> {
                 let scattered_ray = Ray::new(int.p, scattered_dir);
 
                 let attenuation = Vec3::splat(0.5);
-                match pixel_color(scene, &scattered_ray, rng) {
+                match pixel_color(scene, &scattered_ray, rng, depth - 1) {
                     Some(li) => Some(attenuation * li),
                     None => Some(attenuation),
                 }
