@@ -17,6 +17,7 @@ use glam::{vec3, Vec2, Vec3};
 
 pub struct CameraSample {
     p_film: Vec2,
+    time: f32,
 }
 
 pub fn uniform_sample_sphere(u: Vec2) -> Vec3 {

@@ -39,7 +39,10 @@ impl Renderer {
                 for _ in 0..self.samples_per_pixel {
                     let p_film = p_raster + rng.gen::<Vec2>();
 
-                    let camera_sample = CameraSample { p_film };
+                    let camera_sample = CameraSample {
+                        p_film,
+                        time: rng.gen(),
+                    };
                     let ray = scene.camera.ray(&camera_sample);
 
                     if let Some(color) = self.pixel_color(scene, &ray, &mut rng, 0) {

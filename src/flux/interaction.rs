@@ -7,12 +7,13 @@ pub struct Interaction {
     pub p: Vec3,
     pub n: Vec3,
     pub front_face: bool,
+    pub time: f32,
 }
 
 impl Interaction {
     pub fn spawn_ray(&self, direction: Vec3) -> Ray {
         let origin = offset_ray_origin(self.p, self.n);
-        Ray::new(origin, direction)
+        Ray::new(origin, direction, self.time)
     }
 }
 

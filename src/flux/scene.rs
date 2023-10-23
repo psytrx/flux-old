@@ -47,6 +47,7 @@ impl Scene {
                 p,
                 n,
                 front_face,
+                time: ray.time,
             }
         })
     }

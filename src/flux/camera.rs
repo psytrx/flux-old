@@ -25,6 +25,6 @@ impl Camera {
         let target = top_left + horizontal * uv.x + vertical * uv.y;
         let direction = target - origin;
 
-        Ray::new(origin, direction)
+        Ray::new(origin, direction, sample.time)
     }
 }
