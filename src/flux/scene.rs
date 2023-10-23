@@ -14,7 +14,7 @@ pub struct Scene {
 }
 
 // TODO: This is currently required for the progressive renderer to share the scene between
-// threads. However, we may be able to clone it. Take care about the shared resources between
+// threads. However, we may be able to clone it. Take care of the shared resources between
 // the Embree API, since it counts references and can't know we copied/cloned the reference.
 unsafe impl Sync for Scene {}
 
@@ -30,25 +30,14 @@ impl Scene {
 
     pub fn intersect(&self, ray: &Ray) -> Option<Interaction> {
         let mut ray_hit = RTCRayHit {
-            ray: RTCRay {
-                org_x: ray.origin.x,
-                org_y: ray.origin.y,
-                org_z: ray.origin.z,
-                tnear: f32::EPSILON,
-                dir_x: ray.direction.x,
-                dir_y: ray.direction.y,
-                dir_z: ray.direction.z,
-                time: 0.0,
-                tfar: f32::INFINITY,
-                ..Default::default()
-            },
+            ray: RTCRay::from(ray),
             hit: Default::default(),
         };
 
         unsafe { rtcIntersect1(self.accel.scene, &mut ray_hit, null_mut()) };
 
         (ray_hit.hit.geomID != RTC_INVALID_GEOMETRY_ID).then(|| {
-            let t = ray_hit.ray.tfar;
+            let t = ray_hit.ray.tfar.next_down();
             let p = ray.at(t);
 
             let n = vec3(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z).normalize();
