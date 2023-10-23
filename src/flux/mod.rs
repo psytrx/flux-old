@@ -1,3 +1,4 @@
+mod camera;
 mod interaction;
 mod list;
 mod ray;
@@ -6,21 +7,16 @@ mod sphere;
 use glam::{vec2, vec3, UVec2, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
 
-use self::{list::ShapeList, ray::Ray, sphere::Sphere};
+use self::{camera::Camera, list::ShapeList, ray::Ray, sphere::Sphere};
 
 pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
-    let look_from = vec3(0.0, 1.0, -4.0);
-    let viewport_width = 4.0;
-    let viewport_height = viewport_width / resolution.x as f32 * resolution.y as f32;
-    let top_left = vec3(-viewport_width / 2.0, viewport_height / 2.0, 0.0);
-    let horizontal = vec3(viewport_width, 0.0, 0.0);
-    let vertical = vec3(0.0, -viewport_height, 0.0);
-
     let list = ShapeList::new(vec![
         Sphere::new(vec3(0.0, 1.0, 0.0), 1.0),
         Sphere::new(vec3(1.0, 0.25, -1.0), 0.25),
         Sphere::new(vec3(0.0, -100.0, 0.0), 100.0),
     ]);
+
+    let camera = Camera::new(resolution);
 
     RgbImage::from_fn(resolution.x, resolution.y, |x, y| {
         let uv = vec2(
@@ -28,11 +24,7 @@ pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
             y as f32 / resolution.y as f32,
         );
 
-        let origin = look_from;
-        let target = top_left + horizontal * uv.x + vertical * uv.y;
-        let direction = target - origin;
-        let ray = Ray::new(origin, direction);
-
+        let ray = camera.ray(uv);
         let color = pixel_color(&list, &ray);
 
         color_to_rgb(color)
