@@ -1,13 +1,17 @@
 mod flux;
 
+use anyhow::Result;
 use glam::uvec2;
+use measure_time::trace_time;
 
-fn main() -> anyhow::Result<()> {
+use crate::flux::render_image;
+
+fn main() -> Result<()> {
     env_logger::init();
-    measure_time::trace_time!("main");
+    trace_time!("main");
 
     let resolution = uvec2(800, 600);
-    let img = flux::render_image(resolution);
+    let img = render_image(resolution);
     img.save("./output/output.png")?;
 
     Ok(())
