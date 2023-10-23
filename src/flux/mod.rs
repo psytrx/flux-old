@@ -2,21 +2,24 @@ mod camera;
 mod interaction;
 mod list;
 mod ray;
+mod scene;
 mod sphere;
 
 use glam::{vec2, vec3, UVec2, Vec3};
 use image::{ImageBuffer, Rgb, RgbImage};
 
-use self::{camera::Camera, list::ShapeList, ray::Ray, sphere::Sphere};
+use self::{camera::Camera, list::ShapeList, ray::Ray, scene::Scene, sphere::Sphere};
 
 pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
-    let list = ShapeList::new(vec![
+    let camera = Camera::new(resolution);
+
+    let aggregate = ShapeList::new(vec![
         Sphere::new(vec3(0.0, 1.0, 0.0), 1.0),
         Sphere::new(vec3(1.0, 0.25, -1.0), 0.25),
         Sphere::new(vec3(0.0, -100.0, 0.0), 100.0),
     ]);
 
-    let camera = Camera::new(resolution);
+    let scene = Scene { camera, aggregate };
 
     RgbImage::from_fn(resolution.x, resolution.y, |x, y| {
         let uv = vec2(
@@ -24,15 +27,15 @@ pub fn render_image(resolution: UVec2) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
             y as f32 / resolution.y as f32,
         );
 
-        let ray = camera.ray(uv);
-        let color = pixel_color(&list, &ray);
+        let ray = scene.camera.ray(uv);
+        let color = pixel_color(&scene, &ray);
 
         color_to_rgb(color)
     })
 }
 
-fn pixel_color(list: &ShapeList, ray: &Ray) -> Vec3 {
-    match list.intersect(ray, f32::EPSILON..f32::INFINITY) {
+fn pixel_color(scene: &Scene, ray: &Ray) -> Vec3 {
+    match scene.aggregate.intersect(ray, f32::EPSILON..f32::INFINITY) {
         None => {
             let unit_direction = ray.direction.normalize();
             let a = (unit_direction.y + 1.0) / 2.0;
