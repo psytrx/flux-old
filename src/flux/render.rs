@@ -24,10 +24,26 @@ impl Renderer {
     }
 
     pub fn render_film(&self, scene: &Scene) -> Film {
-        let mut film = Film::new(scene.camera.resolution);
-        let mut rng = StdRng::seed_from_u64(0);
-
         let t0 = std::time::Instant::now();
+        let film = self.render_pass(scene, 0);
+        let elapsed = t0.elapsed();
+
+        let rays = self.rays.load(Ordering::Relaxed);
+        debug!("rays:     {:>16}", rays.to_formatted_string(&Locale::en));
+
+        let rays_per_sec = (rays as f32 / elapsed.as_secs_f32()) as usize;
+        debug!(
+            "rays/sec: {:>16}",
+            rays_per_sec.to_formatted_string(&Locale::en)
+        );
+
+        film
+    }
+
+    fn render_pass(&self, scene: &Scene, pass: u64) -> Film {
+        let mut film = Film::new(scene.camera.resolution);
+        let mut rng = StdRng::seed_from_u64(pass);
+
         for y in 0..scene.camera.resolution.y {
             for x in 0..scene.camera.resolution.x {
                 let p_raster = vec2(x as f32, y as f32);
@@ -47,16 +63,6 @@ impl Renderer {
                 }
             }
         }
-        let elapsed = t0.elapsed();
-
-        let rays = self.rays.load(Ordering::Relaxed);
-        debug!("rays:     {:>16}", rays.to_formatted_string(&Locale::en));
-
-        let rays_per_sec = (rays as f32 / elapsed.as_secs_f32()) as usize;
-        debug!(
-            "rays/sec: {:>16}",
-            rays_per_sec.to_formatted_string(&Locale::en)
-        );
 
         film
     }
