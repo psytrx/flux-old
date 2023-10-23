@@ -31,7 +31,7 @@ pub fn render_image(scene: &Scene) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
             }
 
             let color = color_sum / weight_sum;
-            color_to_rgb(color)
+            color_to_srgb(color)
         },
     )
 }
@@ -72,7 +72,10 @@ fn pixel_color(scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: usize) -> Opti
     }
 }
 
-fn color_to_rgb(color: Vec3) -> Rgb<u8> {
+fn color_to_srgb(color: Vec3) -> Rgb<u8> {
+    // "gamma 2" correction
+    let color = vec3(color.x.sqrt(), color.y.sqrt(), color.z.sqrt());
+
     let ir = (255.0 * color.x.clamp(0.0, 1.0)) as u8;
     let ig = (255.0 * color.y.clamp(0.0, 1.0)) as u8;
     let ib = (255.0 * color.z.clamp(0.0, 1.0)) as u8;
