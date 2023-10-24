@@ -137,19 +137,22 @@ impl Renderer {
                     rays,
                 }
             }
-            Some(int) => match int.primitive.material.scatter(ray, &int, rng) {
-                Some(srec) => {
-                    let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
-                    ColorResult {
-                        color: rr_factor * srec.attenuation * li.color,
-                        rays: rays + li.rays,
+            Some(int) => {
+                let le = int.primitive.material.emitted(&int);
+                match int.primitive.material.scatter(ray, &int, rng) {
+                    Some(srec) => {
+                        let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
+                        ColorResult {
+                            color: rr_factor * (le + srec.attenuation * li.color),
+                            rays: rays + li.rays,
+                        }
                     }
+                    None => ColorResult {
+                        color: rr_factor * le,
+                        rays,
+                    },
                 }
-                None => ColorResult {
-                    color: Vec3::ZERO,
-                    rays,
-                },
-            },
+            }
         }
     }
 }

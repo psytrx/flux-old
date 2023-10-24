@@ -14,7 +14,8 @@ use crate::{
     flux::{
         shapes::{Floor, Quad, Sphere},
         textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
-        Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
+        Bounds2, DielectricMaterial, DiffuseLightMaterial, MatteMaterial, MetalMaterial, Primitive,
+        Scene,
     },
 };
 
@@ -137,6 +138,10 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         let tex = Rc::new(ConstantTexture::new(vec3(0.65, 0.05, 0.05)));
         Rc::new(MatteMaterial::new(tex))
     };
+    let light_mat = {
+        let tex = Rc::new(ConstantTexture::new(15.0 * Vec3::ONE));
+        Rc::new(DiffuseLightMaterial::new(tex))
+    };
 
     let ulf = vec3(-box_size, box_size, -box_size) / 2.0;
     let dlf = vec3(-box_size, -box_size, -box_size) / 2.0;
@@ -167,8 +172,20 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         let shape = Box::new(Quad::new([dlb, ulb, urb, drb]));
         Primitive::new(shape, white_mat.clone())
     };
+    let light = {
+        let size = box_size / 10.0 / 2.0;
+        let y = box_size / 2.0 - 32.0 * f32::EPSILON;
 
-    vec![left_wall, right_wall, floor, ceiling, back_wall]
+        let lf = vec3(-size, y, -size);
+        let rf = vec3(size, y, -size);
+        let rb = vec3(size, y, size);
+        let lb = vec3(-size, y, size);
+
+        let shape = Box::new(Quad::new([lf, rf, rb, lb]));
+        Primitive::new(shape, light_mat.clone())
+    };
+
+    vec![left_wall, right_wall, floor, ceiling, back_wall, light]
 }
 
 pub fn sample_disks(

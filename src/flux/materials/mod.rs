@@ -1,8 +1,10 @@
 mod dielectric;
+mod diffuse_light;
 mod matte;
 mod metal;
 
 pub use dielectric::DielectricMaterial;
+pub use diffuse_light::DiffuseLightMaterial;
 pub use matte::MatteMaterial;
 pub use metal::MetalMaterial;
 
@@ -18,6 +20,10 @@ pub struct ScatterRec {
 
 pub trait Material {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec>;
+
+    fn emitted(&self, _int: &Interaction) -> Vec3 {
+        Vec3::ZERO
+    }
 }
 
 pub fn is_near_zero(v: Vec3) -> bool {
