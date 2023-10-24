@@ -33,7 +33,7 @@ impl Material for DielectricMaterial {
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let reflecting = cannot_refract && reflectance(cos_theta, refraction_ratio) > rng.gen();
+        let reflecting = cannot_refract || reflectance(cos_theta, refraction_ratio) > rng.gen();
 
         let scattered = if reflecting {
             let direction = reflect(unit_direction, int.n);
