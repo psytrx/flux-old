@@ -25,7 +25,7 @@ fn main() -> Result<()> {
 
     let scene = {
         info!("Loading scene...");
-        load_example_scene(ExampleScene::ManySpheres)
+        load_example_scene(ExampleScene::CornellBox)
     };
 
     let samples_per_pixel = if debug_mode { 1 } else { 8 };

@@ -1,16 +1,20 @@
+mod cornell_box;
 mod defocus_blur;
 mod many_spheres;
 mod material_demo;
 
 use std::rc::Rc;
 
-use glam::{vec2, vec3, Vec2};
+use glam::{vec2, vec3, Vec2, Vec3};
 use log::debug;
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{
-    shapes::{Floor, Sphere},
-    Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
+use crate::{
+    example_scenes::cornell_box::cornell_box,
+    flux::{
+        shapes::{Floor, Quad, Sphere},
+        Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
+    },
 };
 
 use defocus_blur::defocus_blur;
@@ -22,6 +26,7 @@ pub enum ExampleScene {
     MaterialDemo,
     DefocusBlur,
     ManySpheres,
+    CornellBox,
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {
@@ -30,6 +35,7 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
         ExampleScene::MaterialDemo => material_demo(),
         ExampleScene::DefocusBlur => defocus_blur(),
         ExampleScene::ManySpheres => many_spheres(),
+        ExampleScene::CornellBox => cornell_box(),
     }
 }
 
@@ -60,6 +66,44 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
     };
 
     vec![floor, left_sphere, center_sphere, right_sphere]
+}
+
+pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
+    let white_mat = Rc::new(MatteMaterial::new(Vec3::splat(0.73)));
+    let green_mat = Rc::new(MatteMaterial::new(vec3(0.12, 0.45, 0.15)));
+    let red_mat = Rc::new(MatteMaterial::new(vec3(0.65, 0.05, 0.05)));
+
+    let ulf = vec3(-box_size, box_size, -box_size) / 2.0;
+    let dlf = vec3(-box_size, -box_size, -box_size) / 2.0;
+    let dlb = vec3(-box_size, -box_size, box_size) / 2.0;
+    let ulb = vec3(-box_size, box_size, box_size) / 2.0;
+    let urf = vec3(box_size, box_size, -box_size) / 2.0;
+    let drf = vec3(box_size, -box_size, -box_size) / 2.0;
+    let drb = vec3(box_size, -box_size, box_size) / 2.0;
+    let urb = vec3(box_size, box_size, box_size) / 2.0;
+
+    let left_wall = {
+        let shape = Box::new(Quad::new([ulf, ulb, dlb, dlf]));
+        Primitive::new(shape, green_mat.clone())
+    };
+    let right_wall = {
+        let shape = Box::new(Quad::new([urf, drf, drb, urb]));
+        Primitive::new(shape, red_mat.clone())
+    };
+    let floor = {
+        let shape = Box::new(Quad::new([dlf, dlb, drb, drf]));
+        Primitive::new(shape, white_mat.clone())
+    };
+    let ceiling = {
+        let shape = Box::new(Quad::new([ulf, urf, urb, ulb]));
+        Primitive::new(shape, white_mat.clone())
+    };
+    let back_wall = {
+        let shape = Box::new(Quad::new([dlb, ulb, urb, drb]));
+        Primitive::new(shape, white_mat.clone())
+    };
+
+    vec![left_wall, right_wall, floor, ceiling, back_wall]
 }
 
 pub fn sample_disks(
