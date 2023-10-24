@@ -39,9 +39,11 @@ impl Shape for Sphere {
     }
 
     fn uv(&self, p: Vec3) -> Vec2 {
-        let n = (p - self.center) / self.radius;
-        let theta = (-n.y / self.radius).acos();
-        let phi = (-n.z).atan2(n.x) + PI;
+        let oc = p - self.center;
+
+        let theta = (-oc.y / self.radius).acos();
+        let phi = (-oc.z).atan2(oc.x) + PI;
+
         vec2(phi / (2.0 * PI), theta / PI)
     }
 }

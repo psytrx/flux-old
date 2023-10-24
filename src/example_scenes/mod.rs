@@ -13,7 +13,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         shapes::{Floor, Quad, Sphere},
-        textures::{CheckerTexture, ConstantTexture},
+        textures::{CheckerTexture, ConstantTexture, UvTexture},
         Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
     },
 };
@@ -59,6 +59,10 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.6, 0.2)));
         Rc::new(MetalMaterial::new(tex, 0.05))
     };
+    let mat_uv = {
+        let tex = Rc::new(UvTexture::new());
+        Rc::new(MatteMaterial::new(tex))
+    };
     let mat_checkered = {
         let even = Rc::new(ConstantTexture::new(Vec3::ZERO));
         let odd = Rc::new(ConstantTexture::new(Vec3::ONE));
@@ -82,6 +86,10 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         let shape = Box::new(Sphere::new(vec3(2.0, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat_right.clone())
     };
+    let uv_sphere = {
+        let shape = Box::new(Sphere::new(vec3(0.5, 0.2, -1.5), 0.2));
+        Primitive::new(shape, mat_uv.clone())
+    };
     let checkered_sphere = {
         let shape = Box::new(Sphere::new(vec3(1.0, 0.2, -1.5), 0.2));
         Primitive::new(shape, mat_checkered.clone())
@@ -92,6 +100,7 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         left_sphere,
         center_sphere,
         right_sphere,
+        uv_sphere,
         checkered_sphere,
     ]
 }
