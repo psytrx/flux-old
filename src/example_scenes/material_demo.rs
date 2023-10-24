@@ -2,7 +2,9 @@ use std::rc::Rc;
 
 use glam::{uvec2, vec3};
 
-use crate::flux::{Camera, MatteMaterial, MetalMaterial, Primitive, Scene, Sphere};
+use crate::flux::{
+    Camera, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene, Sphere,
+};
 
 pub fn material_demo() -> Scene {
     let camera = {
@@ -15,9 +17,9 @@ pub fn material_demo() -> Scene {
     };
 
     let mat_floor = Rc::new(MatteMaterial::new(vec3(0.8, 0.8, 0.0)));
-    let mat_left = Rc::new(MetalMaterial::new(vec3(0.8, 0.8, 0.8), 0.3));
-    let mat_center = Rc::new(MatteMaterial::new(vec3(0.7, 0.3, 0.3)));
-    let mat_right = Rc::new(MetalMaterial::new(vec3(0.8, 0.6, 0.2), 1.0));
+    let mat_left = Rc::new(DielectricMaterial::new(1.5));
+    let mat_center = Rc::new(MatteMaterial::new(vec3(0.1, 0.2, 0.5)));
+    let mat_right = Rc::new(MetalMaterial::new(vec3(0.8, 0.6, 0.2), 0.1));
 
     let floor_sphere = {
         let shape = Sphere::new(vec3(0.0, -100.0, 0.0), 100.0);
