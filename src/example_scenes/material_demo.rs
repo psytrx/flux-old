@@ -11,14 +11,14 @@ pub fn material_demo() -> Scene {
         let resolution = uvec2(800, 450);
         let look_from = vec3(0.0, 2.0, -8.0);
         let look_at = vec3(0.0, 0.5, 0.0);
-        let fov = 40.0;
+        let fov = 45.0;
 
         Camera::new(
             resolution,
             look_from,
             look_at,
             fov,
-            0.1,
+            0.025,
             look_at.distance(look_from),
         )
     };
