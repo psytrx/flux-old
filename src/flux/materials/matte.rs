@@ -26,7 +26,7 @@ impl Material for MatteMaterial {
             } else {
                 direction
             };
-            let scattered = Some(int.spawn_ray(direction));
+            let scattered = int.spawn_ray(direction);
 
             ScatterRec {
                 attenuation,

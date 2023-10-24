@@ -11,10 +11,9 @@ use rand::rngs::StdRng;
 
 use super::{interaction::Interaction, ray::Ray};
 
-#[derive(Debug)]
 pub struct ScatterRec {
     pub attenuation: Vec3,
-    pub scattered: Option<Ray>,
+    pub scattered: Ray,
 }
 
 pub trait Material {

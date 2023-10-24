@@ -1,9 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use glam::{vec2, vec3, UVec2, Vec2, Vec3};
-
 use log::debug;
-
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
@@ -118,15 +116,15 @@ impl Renderer {
         }
 
         let rr_factor = if depth >= self.min_depth {
-            let prob = 1.0 - self.rr_stop_prob;
-            let q: f32 = rng.gen();
-            if q < prob {
+            let q = 1.0 - self.rr_stop_prob;
+            let s: f32 = rng.gen();
+            if s < q {
                 return ColorResult {
                     color: Vec3::ZERO,
                     rays: 0,
                 };
             }
-            1.0 / prob
+            1.0 / q
         } else {
             1.0
         };
@@ -145,19 +143,13 @@ impl Renderer {
                 }
             }
             Some(int) => match int.primitive.material.scatter(ray, &int, rng) {
-                Some(srec) => match srec.scattered {
-                    Some(scattered) => {
-                        let li = self.pixel_color(scene, &scattered, rng, depth + 1);
-                        ColorResult {
-                            color: rr_factor * srec.attenuation * li.color,
-                            rays: rays + li.rays,
-                        }
+                Some(srec) => {
+                    let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
+                    ColorResult {
+                        color: rr_factor * srec.attenuation * li.color,
+                        rays: rays + li.rays,
                     }
-                    None => ColorResult {
-                        color: Vec3::ZERO,
-                        rays,
-                    },
-                },
+                }
                 None => ColorResult {
                     color: Vec3::ZERO,
                     rays,

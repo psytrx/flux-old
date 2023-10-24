@@ -1,5 +1,4 @@
 use glam::Vec3;
-
 use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{interaction::Interaction, ray::Ray};
@@ -33,12 +32,22 @@ impl Material for DielectricMaterial {
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
         let reflecting = cannot_refract && reflectance(cos_theta, refraction_ratio) > rng.gen();
 
-        let direction = if reflecting {
-            reflect(unit_direction, int.n)
+        let scattered = if reflecting {
+            let direction = reflect(unit_direction, int.n);
+            int.spawn_ray(direction)
         } else {
-            refract(unit_direction, int.n, refraction_ratio)
+            let direction = refract(unit_direction, int.n, refraction_ratio);
+            // If we refract the ray, we need to flip the normal direction so we offset the spawned
+            // ray in the correct direction.
+            // TODO: avoid this allocation, maybe pass an extra paramter into
+            // Interaction::spawn_ray to flip the direction?
+            let int = Interaction {
+                front_face: !int.front_face,
+                n: -int.n,
+                ..*int
+            };
+            int.spawn_ray(direction)
         };
-        let scattered = Some(int.spawn_ray(direction));
 
         Some(ScatterRec {
             attenuation,
@@ -51,40 +60,4 @@ fn reflectance(cosine: f32, ref_idx: f32) -> f32 {
     let r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
     let r0 = r0 * r0;
     r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
-}
-
-#[test]
-fn test_refracting_ray() {
-    let mut rng = <StdRng as rand::SeedableRng>::seed_from_u64(0);
-
-    let mat = std::rc::Rc::new(DielectricMaterial::new(1.5));
-
-    let sphere = {
-        let shape = crate::flux::Sphere::new(Vec3::ZERO, 1.0);
-        crate::flux::Primitive::new(shape, mat.clone())
-    };
-
-    let dummy_cam = crate::flux::Camera::new(glam::UVec2::ZERO, Vec3::ZERO, Vec3::ZERO, 0.0);
-    let scene = crate::flux::Scene::new(dummy_cam, vec![sphere]);
-
-    let p0 = glam::vec3(0.2, 0.2, -4.0);
-    println!("p0: {:?}", p0);
-
-    let ray = Ray::new(p0, Vec3::Z, 0.0);
-    let int = scene.intersect(&ray).unwrap();
-    let p1 = int.p;
-    println!("p1: {:?}", p1);
-
-    let scattered_ray = mat.scatter(&ray, &int, &mut rng).unwrap().scattered;
-    println!("scattered: {:?}", scattered_ray);
-
-    let int = scene.intersect(&ray).unwrap();
-    let p2 = int.p;
-    println!("p2: {:?}", p2);
-
-    let offset = 0.57735;
-    let internal_ray = Ray::new(glam::vec3(offset, offset, -offset), Vec3::Z, 0.0);
-    let int = scene.intersect(&internal_ray).unwrap();
-    let p_internal = int.p;
-    println!("p_internal: {:?}", p_internal);
 }

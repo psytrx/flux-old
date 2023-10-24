@@ -18,19 +18,21 @@ impl MetalMaterial {
 
 impl Material for MetalMaterial {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
-        int.front_face.then(|| {
-            let attenuation = self.albedo;
+        int.front_face
+            .then(|| {
+                let attenuation = self.albedo;
 
-            let reflected = reflect(ray.direction.normalize(), int.n);
-            let direction = reflected + self.fuzz * uniform_sample_sphere(rng.gen());
+                let reflected = reflect(ray.direction.normalize(), int.n);
+                let direction = reflected + self.fuzz * uniform_sample_sphere(rng.gen());
 
-            // gazing rays, scattering to below the surface
-            let scattered = (direction.dot(int.n) > 0.0).then(|| int.spawn_ray(direction));
+                // gazing rays, scattering to below the originating surface
+                let gazing = direction.dot(int.n) > 0.0;
 
-            ScatterRec {
-                attenuation,
-                scattered,
-            }
-        })
+                gazing.then(|| ScatterRec {
+                    attenuation,
+                    scattered: int.spawn_ray(direction),
+                })
+            })
+            .unwrap_or(None)
     }
 }
