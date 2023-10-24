@@ -21,8 +21,7 @@ pub trait Material {
 }
 
 pub fn is_near_zero(v: Vec3) -> bool {
-    let s = 8.0 * f32::EPSILON;
-    v.x.abs() < s && v.y.abs() < s && v.z.abs() < s
+    v.x.abs() <= f32::EPSILON && v.y.abs() <= f32::EPSILON && v.z.abs() <= f32::EPSILON
 }
 
 pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
