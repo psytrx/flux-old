@@ -110,7 +110,7 @@ impl Renderer {
             };
         }
 
-        let rr_factor = if depth >= self.min_depth {
+        let rr_factor = if depth > self.min_depth {
             let q = 1.0 - self.rr_stop_prob;
             let s: f32 = rng.gen();
             if s < q {

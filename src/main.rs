@@ -28,9 +28,9 @@ fn main() -> Result<()> {
         load_example_scene(ExampleScene::ManySpheres)
     };
 
-    let samples_per_pixel = if debug_mode { 4 } else { 16 };
+    let samples_per_pixel = if debug_mode { 1 } else { 8 };
     let sampler = StratifiedSampler::new(samples_per_pixel);
-    let renderer = Renderer::new(sampler, 4, 16, 0.1, num_passes);
+    let renderer = Renderer::new(sampler, 8, 32, 0.1, num_passes);
 
     let t0 = std::time::Instant::now();
     let result = {
