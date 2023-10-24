@@ -4,8 +4,8 @@ use glam::{uvec2, vec2, vec3, Vec3};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::flux::{
-    Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial, Primitive, Scene,
-    Sphere,
+    shapes::Sphere, Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial,
+    Primitive, Scene,
 };
 
 use super::sample_disks;

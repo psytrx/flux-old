@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use embree4_sys::{RTCDevice, RTCGeometry};
 
-use super::{materials::Material, Sphere};
+use super::{materials::Material, shapes::Sphere};
 
 pub struct Primitive {
     pub shape: Sphere,

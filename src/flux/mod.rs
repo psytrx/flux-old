@@ -9,7 +9,7 @@ mod primitive;
 mod ray;
 mod render;
 mod scene;
-mod sphere;
+pub mod shapes;
 
 pub use bounds::Bounds2;
 pub use camera::Camera;
@@ -18,7 +18,6 @@ pub use materials::*;
 pub use primitive::Primitive;
 pub use render::Renderer;
 pub use scene::Scene;
-pub use sphere::Sphere;
 
 use std::f32::consts::PI;
 

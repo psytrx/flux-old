@@ -9,7 +9,7 @@ use log::debug;
 use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{
-    Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene, Sphere,
+    shapes::Sphere, Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
 };
 
 use defocus_blur::defocus_blur;
