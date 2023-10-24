@@ -6,6 +6,7 @@ mod material_demo;
 use std::rc::Rc;
 
 use glam::{vec2, vec3, Vec2, Vec3};
+
 use log::debug;
 use rand::{rngs::StdRng, Rng};
 
@@ -13,7 +14,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         shapes::{Floor, Quad, Sphere},
-        textures::{CheckerTexture, ConstantTexture, UvTexture},
+        textures::{CheckerTexture, ConstantTexture, ImageTexture, UvTexture},
         Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
     },
 };
@@ -69,10 +70,19 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         let tex = Rc::new(CheckerTexture::new(0.1, even, odd));
         Rc::new(MatteMaterial::new(tex))
     };
+    let mat_earth = {
+        let img = image::open("./assets/earthmap.jpg").unwrap();
+        let tex = Rc::new(ImageTexture::new(img));
+        Rc::new(MatteMaterial::new(tex))
+    };
 
     let floor = {
         let shape = Box::new(Floor::new());
         Primitive::new(shape, mat_floor.clone())
+    };
+    let earth = {
+        let shape = Box::new(Sphere::new(vec3(0.0, 10.0, 10.0), 10.0));
+        Primitive::new(shape, mat_earth.clone())
     };
     let left_sphere = {
         let shape = Box::new(Sphere::new(vec3(-2.0, 1.0, 0.0), 1.0));
@@ -97,6 +107,7 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
 
     vec![
         floor,
+        earth,
         left_sphere,
         center_sphere,
         right_sphere,

@@ -8,8 +8,8 @@ pub fn material_demo() -> Scene {
     let camera = {
         let resolution = uvec2(800, 450);
         let look_from = vec3(0.0, 2.0, -8.0);
-        let look_at = vec3(0.0, 0.5, 0.0);
-        let fov = 45.0;
+        let look_at = vec3(0.0, 2.0, 0.0);
+        let fov = 70.0;
 
         Camera::new(
             resolution,

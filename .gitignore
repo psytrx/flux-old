@@ -6,3 +6,6 @@
 /profile.json
 
 TEMP.md
+
+/assets/*
+!/assets/README.md
