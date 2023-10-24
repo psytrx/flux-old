@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use glam::{vec2, vec3, UVec2, Vec3};
+use glam::{vec2, UVec2, Vec3};
 use log::debug;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
@@ -126,19 +126,9 @@ impl Renderer {
 
         let rays = 1;
         match scene.intersect(ray) {
-            None => {
-                let unit_direction = ray.direction.normalize();
-                let a = (unit_direction.y + 1.0) / 2.0;
-                let horizon_color = vec3(0.5, 0.7, 1.0);
-                let zenith_color = vec3(1.0, 1.0, 1.0);
-                let color = (1.0 - a) * zenith_color + a * horizon_color;
-                ColorResult {
-                    color: rr_factor * color,
-                    rays,
-                }
-            }
             Some(int) => {
                 let le = int.primitive.material.emitted(&int);
+
                 match int.primitive.material.scatter(ray, &int, rng) {
                     Some(srec) => {
                         let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
@@ -151,6 +141,14 @@ impl Renderer {
                         color: rr_factor * le,
                         rays,
                     },
+                }
+            }
+            None => {
+                let background_radiance =
+                    scene.lights.iter().map(|light| light.le(ray)).sum::<Vec3>();
+                ColorResult {
+                    color: rr_factor * background_radiance,
+                    rays,
                 }
             }
         }

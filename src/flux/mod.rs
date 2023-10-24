@@ -4,6 +4,7 @@ mod camera;
 mod denoise;
 mod film;
 mod interaction;
+pub mod lights;
 mod materials;
 mod primitive;
 mod ray;

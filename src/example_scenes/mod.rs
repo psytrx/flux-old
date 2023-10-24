@@ -12,6 +12,7 @@ use rand::{rngs::StdRng, Rng};
 use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
+        lights::{Light, SkyLight},
         shapes::{Floor, Quad, Sphere},
         textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
         Bounds2, DielectricMaterial, DiffuseLightMaterial, MatteMaterial, MetalMaterial, Primitive,
@@ -39,6 +40,13 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
         ExampleScene::ManySpheres => many_spheres(),
         ExampleScene::CornellBox => cornell_box(),
     }
+}
+
+pub fn default_sky_light() -> Box<dyn Light> {
+    let horizon_color = vec3(0.5, 0.7, 1.0);
+    let zenith_color = Vec3::ONE;
+    let light = SkyLight::new(horizon_color, zenith_color);
+    Box::new(light)
 }
 
 pub fn material_demo_primitives() -> Vec<Primitive> {
@@ -173,7 +181,7 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         Primitive::new(shape, white_mat.clone())
     };
     let light = {
-        let size = box_size / 10.0 / 2.0;
+        let size = box_size / 5.0 / 2.0;
         let y = box_size / 2.0 - 32.0 * f32::EPSILON;
 
         let lf = vec3(-size, y, -size);

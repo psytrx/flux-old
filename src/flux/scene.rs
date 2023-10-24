@@ -4,13 +4,15 @@ use embree4_sys::{rtcIntersect1, RTCRay, RTCRayHit, RTC_INVALID_GEOMETRY_ID};
 use glam::vec3;
 
 use super::{
-    accel::EmbreeAccel, camera::Camera, interaction::Interaction, primitive::Primitive, ray::Ray,
+    accel::EmbreeAccel, camera::Camera, interaction::Interaction, lights::Light,
+    primitive::Primitive, ray::Ray,
 };
 
 pub struct Scene {
-    pub camera: Camera,
-    pub accel: EmbreeAccel,
     primitives: Vec<Primitive>,
+    pub accel: EmbreeAccel,
+    pub camera: Camera,
+    pub lights: Vec<Box<dyn Light>>,
 }
 
 // TODO: This is currently required for the progressive renderer to share the scene between
@@ -19,12 +21,13 @@ pub struct Scene {
 unsafe impl Sync for Scene {}
 
 impl Scene {
-    pub fn new(camera: Camera, primitives: Vec<Primitive>) -> Self {
+    pub fn new(camera: Camera, primitives: Vec<Primitive>, lights: Vec<Box<dyn Light>>) -> Self {
         let accel = unsafe { EmbreeAccel::build(&primitives) };
         Self {
-            camera,
-            accel,
             primitives,
+            accel,
+            camera,
+            lights,
         }
     }
 

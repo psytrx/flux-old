@@ -2,7 +2,7 @@ use glam::{uvec2, vec3};
 
 use crate::flux::{Camera, Scene};
 
-use super::material_demo_primitives;
+use super::{default_sky_light, material_demo_primitives};
 
 pub fn defocus_blur() -> Scene {
     let camera = {
@@ -23,5 +23,7 @@ pub fn defocus_blur() -> Scene {
 
     let aggregate = material_demo_primitives();
 
-    Scene::new(camera, aggregate)
+    let lights = vec![default_sky_light()];
+
+    Scene::new(camera, aggregate, lights)
 }

@@ -9,7 +9,7 @@ use crate::flux::{
     Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial, Primitive, Scene,
 };
 
-use super::sample_disks;
+use super::{default_sky_light, sample_disks};
 
 pub fn many_spheres() -> Scene {
     let camera = {
@@ -113,5 +113,7 @@ pub fn many_spheres() -> Scene {
             aggregate.push(primitive);
         });
 
-    Scene::new(camera, aggregate)
+    let lights = vec![default_sky_light()];
+
+    Scene::new(camera, aggregate, lights)
 }

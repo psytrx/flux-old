@@ -25,5 +25,7 @@ pub fn cornell_box() -> Scene {
 
     let aggregate = empty_cornell_box_primitives(box_size);
 
-    Scene::new(camera, aggregate)
+    let lights = vec![];
+
+    Scene::new(camera, aggregate, lights)
 }
