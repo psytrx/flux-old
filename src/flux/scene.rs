@@ -37,11 +37,12 @@ impl Scene {
         unsafe { rtcIntersect1(self.accel.scene, &mut ray_hit, null_mut()) };
 
         (ray_hit.hit.geomID != RTC_INVALID_GEOMETRY_ID).then(|| {
-            let t = ray_hit.ray.tfar.next_down();
+            let t = ray_hit.ray.tfar;
             let p = ray.at(t);
 
             let n = vec3(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z).normalize();
             let front_face = ray.direction.dot(n) < 0.0;
+            let n = if front_face { n } else { -n };
 
             let prim_idx = (ray_hit.hit.geomID - 1) as usize;
             let primitive = &self.primitives[prim_idx];
