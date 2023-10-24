@@ -5,6 +5,7 @@ use embree4_sys::{
     rtcSetGeometryUserPrimitiveCount, RTCBounds, RTCBoundsFunctionArguments, RTCDevice,
     RTCGeometry, RTCGeometryType, RTCIntersectFunctionNArguments, RTCRayHit,
 };
+use glam::{vec2, Vec2, Vec3};
 
 use super::Shape;
 
@@ -25,6 +26,10 @@ impl Shape for Floor {
         rtcSetGeometryIntersectFunction(geometry, Some(intersect_fn));
 
         geometry
+    }
+
+    fn uv(&self, p: Vec3) -> Vec2 {
+        vec2(p.x, p.z)
     }
 }
 

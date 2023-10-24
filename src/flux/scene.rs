@@ -47,12 +47,15 @@ impl Scene {
             let prim_idx = (ray_hit.hit.geomID - 1) as usize;
             let primitive = &self.primitives[prim_idx];
 
+            let uv = primitive.shape.uv(p);
+
             Interaction {
                 t,
                 p,
                 n,
                 front_face,
                 time: ray.time,
+                uv,
                 primitive,
             }
         })

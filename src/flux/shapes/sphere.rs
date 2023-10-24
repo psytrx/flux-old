@@ -1,8 +1,10 @@
+use std::f32::consts::PI;
+
 use embree4_sys::{
     rtcNewGeometry, rtcSetNewGeometryBuffer, RTCBufferType, RTCDevice, RTCFormat, RTCGeometry,
     RTCGeometryType,
 };
-use glam::Vec3;
+use glam::{vec2, Vec2, Vec3};
 
 use super::Shape;
 
@@ -34,5 +36,12 @@ impl Shape for Sphere {
         buffer.copy_from_slice(&[self.center.x, self.center.y, self.center.z, self.radius]);
 
         geometry
+    }
+
+    fn uv(&self, p: Vec3) -> Vec2 {
+        let n = (p - self.center) / self.radius;
+        let theta = (-n.y / self.radius).acos();
+        let phi = (-n.z).atan2(n.x) + PI;
+        vec2(phi / (2.0 * PI), theta / PI)
     }
 }

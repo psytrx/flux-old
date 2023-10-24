@@ -1,4 +1,4 @@
-use glam::{vec3, Vec3};
+use glam::{vec3, Vec2, Vec3};
 
 use super::{primitive::Primitive, ray::Ray};
 
@@ -8,6 +8,7 @@ pub struct Interaction<'a> {
     pub n: Vec3,
     pub front_face: bool,
     pub time: f32,
+    pub uv: Vec2,
     pub primitive: &'a Primitive,
 }
 

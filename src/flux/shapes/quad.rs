@@ -2,7 +2,8 @@ use embree4_sys::{
     rtcNewGeometry, rtcSetNewGeometryBuffer, RTCBufferType, RTCDevice, RTCFormat, RTCGeometry,
     RTCGeometryType,
 };
-use glam::Vec3;
+use glam::{Vec2, Vec3};
+use log::warn;
 
 use super::Shape;
 
@@ -47,5 +48,10 @@ impl Shape for Quad {
         index_buf.copy_from_slice(&[0, 1, 2, 3]);
 
         geometry
+    }
+
+    fn uv(&self, _p: Vec3) -> Vec2 {
+        warn!("Quad::uv not implemented");
+        Vec2::ZERO
     }
 }

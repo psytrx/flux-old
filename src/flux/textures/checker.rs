@@ -18,11 +18,10 @@ impl<T: Copy> CheckerTexture<T> {
 
 impl<T: Copy> Texture<T> for CheckerTexture<T> {
     fn evaluate(&self, int: &Interaction) -> T {
-        let x_int = (int.p.x / self.scale).floor() as i32;
-        let y_int = (int.p.y / self.scale).floor() as i32;
-        let z_int = (int.p.z / self.scale).floor() as i32;
+        let u_int = (int.uv.x / self.scale).floor() as i32;
+        let v_int = (int.uv.y / self.scale).floor() as i32;
 
-        let is_even = (x_int + y_int + z_int) % 2 == 0;
+        let is_even = (u_int + v_int) % 2 == 0;
         if is_even {
             self.even.evaluate(int)
         } else {

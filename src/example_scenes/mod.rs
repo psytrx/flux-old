@@ -59,28 +59,41 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.6, 0.2)));
         Rc::new(MetalMaterial::new(tex, 0.05))
     };
+    let mat_checkered = {
+        let even = Rc::new(ConstantTexture::new(Vec3::ZERO));
+        let odd = Rc::new(ConstantTexture::new(Vec3::ONE));
+        let tex = Rc::new(CheckerTexture::new(0.1, even, odd));
+        Rc::new(MatteMaterial::new(tex))
+    };
 
     let floor = {
         let shape = Box::new(Floor::new());
         Primitive::new(shape, mat_floor.clone())
     };
-
     let left_sphere = {
         let shape = Box::new(Sphere::new(vec3(-2.0, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat_left.clone())
     };
-
     let center_sphere = {
         let shape = Box::new(Sphere::new(vec3(0.0, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat_center.clone())
     };
-
     let right_sphere = {
         let shape = Box::new(Sphere::new(vec3(2.0, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat_right.clone())
     };
+    let checkered_sphere = {
+        let shape = Box::new(Sphere::new(vec3(1.0, 0.2, -1.5), 0.2));
+        Primitive::new(shape, mat_checkered.clone())
+    };
 
-    vec![floor, left_sphere, center_sphere, right_sphere]
+    vec![
+        floor,
+        left_sphere,
+        center_sphere,
+        right_sphere,
+        checkered_sphere,
+    ]
 }
 
 pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
