@@ -25,7 +25,10 @@ impl Material for DielectricMaterial {
             self.ior
         };
 
-        let unit_direction = ray.direction.normalize();
+        // INFO: We expect ray directions to be normalized. See Scene::intersect, where we
+        // normalize the normal vector by default.
+        let unit_direction = ray.direction;
+
         let cos_theta = (-unit_direction).dot(int.n).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
