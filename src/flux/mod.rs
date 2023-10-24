@@ -1,4 +1,5 @@
 mod accel;
+mod bounds;
 mod camera;
 mod denoise;
 mod film;
@@ -10,6 +11,7 @@ mod render;
 mod scene;
 mod sphere;
 
+pub use bounds::Bounds2;
 pub use camera::Camera;
 pub use denoise::Denoiser;
 pub use materials::*;
