@@ -2,8 +2,7 @@ use embree4_sys::{
     rtcNewGeometry, rtcSetNewGeometryBuffer, RTCBufferType, RTCDevice, RTCFormat, RTCGeometry,
     RTCGeometryType,
 };
-use glam::{Vec2, Vec3};
-use log::warn;
+use glam::{vec2, Vec2, Vec3};
 
 use super::Shape;
 
@@ -50,8 +49,14 @@ impl Shape for Quad {
         geometry
     }
 
-    fn uv(&self, _p: Vec3) -> Vec2 {
-        warn!("Quad::uv not implemented");
-        Vec2::ZERO
+    fn uv(&self, p: Vec3) -> Vec2 {
+        let u_vec = self.vertices[1] - self.vertices[0];
+        let v_vec = self.vertices[3] - self.vertices[0];
+
+        let pc = p - self.vertices[0];
+        let u = pc.dot(u_vec) / u_vec.length_squared();
+        let v = pc.dot(v_vec) / v_vec.length_squared();
+
+        vec2(u, v)
     }
 }

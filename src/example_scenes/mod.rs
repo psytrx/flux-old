@@ -6,7 +6,6 @@ mod material_demo;
 use std::rc::Rc;
 
 use glam::{vec2, vec3, Vec2, Vec3};
-
 use measure_time::debug_time;
 use rand::{rngs::StdRng, Rng};
 
