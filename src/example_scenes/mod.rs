@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use glam::{vec2, vec3, Vec2, Vec3};
 
-use log::debug;
+use measure_time::debug_time;
 use rand::{rngs::StdRng, Rng};
 
 use crate::{
@@ -32,7 +32,7 @@ pub enum ExampleScene {
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {
-    debug!("load_example_scene");
+    debug_time!("load_example_scene");
     match scene {
         ExampleScene::MaterialDemo => material_demo(),
         ExampleScene::DefocusBlur => defocus_blur(),
