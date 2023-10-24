@@ -13,14 +13,14 @@ use super::sample_disks;
 pub fn many_spheres() -> Scene {
     let camera = {
         let resolution = uvec2(800, 450);
-        let look_from = vec3(13.0, 3.0, -3.0);
+        let look_from = vec3(13.0, 4.0, -3.0);
         let look_at = vec3(2.5, 0.5, 0.0);
 
         Camera::new(
             resolution,
             look_from,
             Vec3::ZERO,
-            40.0,
+            35.0,
             0.025,
             look_at.distance(look_from),
         )
@@ -56,7 +56,8 @@ pub fn many_spheres() -> Scene {
     };
 
     let radius = 0.2;
-    let bounds = Bounds2::new(vec2(-25.0, -25.0), vec2(25.0, 25.0));
+    let bounds_dim = 20.0;
+    let bounds = Bounds2::new(vec2(-bounds_dim, -bounds_dim), vec2(bounds_dim, bounds_dim));
     let mut rng = StdRng::seed_from_u64(0);
     sample_disks(bounds, 4.0 * radius, 32, 8, &mut rng)
         .into_iter()
