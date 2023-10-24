@@ -1,23 +1,26 @@
+use std::rc::Rc;
+
 use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{interaction::Interaction, ray::Ray};
+use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture};
 
 use super::{reflect, refract, Material, ScatterRec};
 
 pub struct DielectricMaterial {
+    kd: Rc<dyn Texture<Vec3>>,
     ior: f32,
 }
 
 impl DielectricMaterial {
-    pub fn new(ior: f32) -> Self {
-        Self { ior }
+    pub fn new(kd: Rc<dyn Texture<Vec3>>, ior: f32) -> Self {
+        Self { kd, ior }
     }
 }
 
 impl Material for DielectricMaterial {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
-        let attenuation = Vec3::ONE;
+        let attenuation = self.kd.evaluate(int);
 
         let refraction_ratio = if int.front_face {
             1.0 / self.ior

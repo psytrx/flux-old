@@ -13,8 +13,9 @@ impl StratifiedSampler {
         let nx_ny = ((samples_per_pixel as f32).sqrt().floor() as usize).max(1);
 
         if nx_ny * nx_ny != samples_per_pixel {
-            let samples_per_pixel = nx_ny * nx_ny;
-            warn!("StratifiedSampler exptects samples_per_pixel to be a perfect square number, but got {}. Falling back to {}", samples_per_pixel, samples_per_pixel)
+            let new_samples_per_pixel = nx_ny * nx_ny;
+            warn!("StratifiedSampler exptects samples_per_pixel to be a perfect square number, but got {}. Falling back to {}",
+                samples_per_pixel, new_samples_per_pixel)
         }
 
         Self { nx_ny }

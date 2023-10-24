@@ -1,25 +1,27 @@
+use std::rc::Rc;
+
 use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{interaction::Interaction, ray::Ray, uniform_sample_sphere};
+use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture, uniform_sample_sphere};
 
 use super::{reflect, Material, ScatterRec};
 
 pub struct MetalMaterial {
-    albedo: Vec3,
+    kd: Rc<dyn Texture<Vec3>>,
     fuzz: f32,
 }
 
 impl MetalMaterial {
-    pub fn new(albedo: Vec3, fuzz: f32) -> Self {
-        Self { albedo, fuzz }
+    pub fn new(kd: Rc<dyn Texture<Vec3>>, fuzz: f32) -> Self {
+        Self { kd, fuzz }
     }
 }
 
 impl Material for MetalMaterial {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
         if int.front_face {
-            let attenuation = self.albedo;
+            let attenuation = self.kd.evaluate(int);
 
             let reflected = reflect(ray.direction.normalize(), int.n);
             let direction = reflected + self.fuzz * uniform_sample_sphere(rng.gen());

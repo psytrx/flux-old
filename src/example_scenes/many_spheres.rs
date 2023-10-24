@@ -5,6 +5,7 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::flux::{
     shapes::{Floor, Sphere},
+    textures::ConstantTexture,
     Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial, Primitive, Scene,
 };
 
@@ -27,10 +28,22 @@ pub fn many_spheres() -> Scene {
     };
 
     let mut aggregate = {
-        let floor_mat = Rc::new(MatteMaterial::new(Vec3::splat(0.5)));
-        let left_mat = Rc::new(MatteMaterial::new(vec3(0.4, 0.2, 0.1)));
-        let center_mat = Rc::new(DielectricMaterial::new(1.5));
-        let right_mat = Rc::new(MetalMaterial::new(vec3(0.7, 0.6, 0.5), 0.025));
+        let floor_mat = {
+            let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
+            Rc::new(MatteMaterial::new(tex))
+        };
+        let left_mat = {
+            let tex = Rc::new(ConstantTexture::new(vec3(0.4, 0.2, 0.1)));
+            Rc::new(MatteMaterial::new(tex))
+        };
+        let center_mat = {
+            let tex = Rc::new(ConstantTexture::new(Vec3::ONE));
+            Rc::new(DielectricMaterial::new(tex, 1.5))
+        };
+        let right_mat = {
+            let tex = Rc::new(ConstantTexture::new(vec3(0.7, 0.6, 0.5)));
+            Rc::new(MetalMaterial::new(tex, 0.025))
+        };
 
         let floor = {
             let shape = Box::new(Floor::new());
@@ -74,17 +87,25 @@ pub fn many_spheres() -> Scene {
             let material: Rc<dyn Material> = if choose_mat < 0.6 {
                 // diffuse
                 let albedo = rng.gen::<Vec3>() * rng.gen::<Vec3>();
-                Rc::new(MatteMaterial::new(albedo))
+                let tex = Rc::new(ConstantTexture::new(albedo));
+                Rc::new(MatteMaterial::new(tex))
             } else if choose_mat < 0.9 {
                 let albedo = vec3(
                     rng.gen_range(0.5..1.0),
                     rng.gen_range(0.5..1.0),
                     rng.gen_range(0.5..1.0),
                 );
+                let tex = Rc::new(ConstantTexture::new(albedo));
                 let fuzz = rng.gen_range(0.0..0.5);
-                Rc::new(MetalMaterial::new(albedo, fuzz))
+                Rc::new(MetalMaterial::new(tex, fuzz))
             } else {
-                Rc::new(DielectricMaterial::new(1.5))
+                let albedo = vec3(
+                    rng.gen::<f32>().powf(1.0 / 4.0),
+                    rng.gen::<f32>().powf(1.0 / 4.0),
+                    rng.gen::<f32>().powf(1.0 / 4.0),
+                );
+                let tex = Rc::new(ConstantTexture::new(albedo));
+                Rc::new(DielectricMaterial::new(tex, 1.5))
             };
 
             let shape = Box::new(Sphere::new(sphere_pos, radius));

@@ -28,7 +28,7 @@ fn main() -> Result<()> {
         load_example_scene(ExampleScene::CornellBox)
     };
 
-    let samples_per_pixel = if debug_mode { 1 } else { 8 };
+    let samples_per_pixel = if debug_mode { 1 } else { 4 };
     let sampler = StratifiedSampler::new(samples_per_pixel);
     let renderer = Renderer::new(sampler, 8, 32, 0.1, num_passes);
 

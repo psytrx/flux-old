@@ -13,6 +13,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         shapes::{Floor, Quad, Sphere},
+        textures::ConstantTexture,
         Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
     },
 };
@@ -40,10 +41,22 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
 }
 
 pub fn material_demo_primitives() -> Vec<Primitive> {
-    let mat_floor = Rc::new(MatteMaterial::new(vec3(0.8, 0.8, 0.0)));
-    let mat_left = Rc::new(DielectricMaterial::new(1.5));
-    let mat_center = Rc::new(MatteMaterial::new(vec3(0.1, 0.2, 0.5)));
-    let mat_right = Rc::new(MetalMaterial::new(vec3(0.8, 0.6, 0.2), 0.05));
+    let mat_floor = {
+        let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.8, 0.0)));
+        Rc::new(MatteMaterial::new(tex))
+    };
+    let mat_left = {
+        let tex = Rc::new(ConstantTexture::new(Vec3::ONE));
+        Rc::new(DielectricMaterial::new(tex, 1.5))
+    };
+    let mat_center = {
+        let tex = Rc::new(ConstantTexture::new(vec3(0.1, 0.2, 0.5)));
+        Rc::new(MatteMaterial::new(tex))
+    };
+    let mat_right = {
+        let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.6, 0.2)));
+        Rc::new(MetalMaterial::new(tex, 0.05))
+    };
 
     let floor = {
         let shape = Box::new(Floor::new());
@@ -69,9 +82,18 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
 }
 
 pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
-    let white_mat = Rc::new(MatteMaterial::new(Vec3::splat(0.73)));
-    let green_mat = Rc::new(MatteMaterial::new(vec3(0.12, 0.45, 0.15)));
-    let red_mat = Rc::new(MatteMaterial::new(vec3(0.65, 0.05, 0.05)));
+    let white_mat = {
+        let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.73)));
+        Rc::new(MatteMaterial::new(tex))
+    };
+    let green_mat = {
+        let tex = Rc::new(ConstantTexture::new(vec3(0.12, 0.45, 0.15)));
+        Rc::new(MatteMaterial::new(tex))
+    };
+    let red_mat = {
+        let tex = Rc::new(ConstantTexture::new(vec3(0.65, 0.05, 0.05)));
+        Rc::new(MatteMaterial::new(tex))
+    };
 
     let ulf = vec3(-box_size, box_size, -box_size) / 2.0;
     let dlf = vec3(-box_size, -box_size, -box_size) / 2.0;

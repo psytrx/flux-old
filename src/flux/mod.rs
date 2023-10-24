@@ -11,6 +11,7 @@ mod render;
 mod sampler;
 mod scene;
 pub mod shapes;
+pub mod textures;
 
 pub use bounds::Bounds2;
 pub use camera::Camera;
