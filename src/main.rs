@@ -16,7 +16,10 @@ use crate::{
 fn main() -> Result<()> {
     env_logger::init();
 
-    let sweeps = 1;
+    let args = std::env::args().collect::<Vec<_>>();
+    let debug_mode = args.contains(&String::from("--dev"));
+
+    let sweeps = if debug_mode { 1 } else { 8 };
     let num_cpus = num_cpus::get();
     let num_passes = sweeps * num_cpus;
 
@@ -25,7 +28,8 @@ fn main() -> Result<()> {
         load_example_scene(ExampleScene::ManySpheres)
     };
 
-    let renderer = Renderer::new(4, 4, 16, 0.1, num_passes);
+    let samples_per_pixel = if debug_mode { 4 } else { 16 };
+    let renderer = Renderer::new(samples_per_pixel, 4, 16, 0.1, num_passes);
 
     let t0 = std::time::Instant::now();
     let result = {

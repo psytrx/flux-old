@@ -64,7 +64,7 @@ pub fn many_spheres() -> Scene {
         .for_each(|sample| {
             let sphere_pos = vec3(sample.x, radius, sample.y);
 
-            let safe_box = vec3(sample.x / 5.0, radius, sample.y);
+            let safe_box = vec3(sample.x / 6.0, radius, sample.y);
             let safe_box_dist = safe_box.length();
             if safe_box_dist < 1.0 {
                 return;
