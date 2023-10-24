@@ -24,10 +24,9 @@ impl Material for MetalMaterial {
             let reflected = reflect(ray.direction.normalize(), int.n);
             let direction = reflected + self.fuzz * uniform_sample_sphere(rng.gen());
 
-            // gazing rays, scattering to below the originating surface
-            let gazing = direction.dot(int.n) > 0.0;
-
-            if gazing {
+            // Rays scattering to below the originating surface will be cancelled
+            let above_surface = direction.dot(int.n) > 0.0;
+            if above_surface {
                 let scattered = int.spawn_ray(direction);
                 Some(ScatterRec {
                     attenuation,
