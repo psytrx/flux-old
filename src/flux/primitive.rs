@@ -2,15 +2,15 @@ use std::rc::Rc;
 
 use embree4_sys::{RTCDevice, RTCGeometry};
 
-use super::{materials::Material, shapes::Sphere};
+use super::{materials::Material, shapes::Shape};
 
 pub struct Primitive {
-    pub shape: Sphere,
+    pub shape: Box<dyn Shape>,
     pub material: Rc<dyn Material>,
 }
 
 impl Primitive {
-    pub fn new(shape: Sphere, material: Rc<dyn Material>) -> Self {
+    pub fn new(shape: Box<dyn Shape>, material: Rc<dyn Material>) -> Self {
         Self { shape, material }
     }
 

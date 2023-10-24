@@ -4,6 +4,8 @@ use embree4_sys::{
 };
 use glam::Vec3;
 
+use super::Shape;
+
 pub struct Sphere {
     center: Vec3,
     radius: f32,
@@ -13,8 +15,10 @@ impl Sphere {
     pub fn new(center: Vec3, radius: f32) -> Self {
         Self { center, radius }
     }
+}
 
-    pub unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
+impl Shape for Sphere {
+    unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
         let geometry = rtcNewGeometry(device, RTCGeometryType::SPHERE_POINT);
 
         let buffer_ptr = rtcSetNewGeometryBuffer(

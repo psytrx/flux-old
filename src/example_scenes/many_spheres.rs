@@ -4,8 +4,8 @@ use glam::{uvec2, vec2, vec3, Vec3};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
 use crate::flux::{
-    shapes::Sphere, Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial,
-    Primitive, Scene,
+    shapes::{Floor, Sphere},
+    Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial, Primitive, Scene,
 };
 
 use super::sample_disks;
@@ -33,22 +33,22 @@ pub fn many_spheres() -> Scene {
         let right_mat = Rc::new(MetalMaterial::new(vec3(0.7, 0.6, 0.5), 0.025));
 
         let floor = {
-            let shape = Sphere::new(vec3(0.0, -100.0, 0.0), 100.0);
+            let shape = Box::new(Floor::new());
             Primitive::new(shape, floor_mat.clone())
         };
 
         let left_sphere = {
-            let shape = Sphere::new(vec3(-4.0, 1.0, 0.0), 1.0);
+            let shape = Box::new(Sphere::new(vec3(-4.0, 1.0, 0.0), 1.0));
             Primitive::new(shape, left_mat.clone())
         };
 
         let center_sphere = {
-            let shape = Sphere::new(vec3(0.0, 1.0, 0.0), 1.0);
+            let shape = Box::new(Sphere::new(vec3(0.0, 1.0, 0.0), 1.0));
             Primitive::new(shape, center_mat.clone())
         };
 
         let right_sphere = {
-            let shape = Sphere::new(vec3(4.0, 1.0, 0.0), 1.0);
+            let shape = Box::new(Sphere::new(vec3(4.0, 1.0, 0.0), 1.0));
             Primitive::new(shape, right_mat.clone())
         };
 
@@ -86,7 +86,8 @@ pub fn many_spheres() -> Scene {
                 Rc::new(DielectricMaterial::new(1.5))
             };
 
-            let primitive = Primitive::new(Sphere::new(sphere_pos, radius), material);
+            let shape = Box::new(Sphere::new(sphere_pos, radius));
+            let primitive = Primitive::new(shape, material);
             aggregate.push(primitive);
         });
 
