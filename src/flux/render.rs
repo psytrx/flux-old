@@ -1,14 +1,14 @@
 use std::sync::{Arc, Mutex};
 
-use glam::{vec2, vec3, UVec2, Vec2, Vec3};
+use glam::{vec2, vec3, UVec2, Vec3};
 use log::debug;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use super::{film::Film, ray::Ray, CameraSample, Scene};
+use super::{film::Film, ray::Ray, sampler::StratifiedSampler, Scene};
 
 pub struct Renderer {
-    samples_per_pixel: u32,
+    sampler: StratifiedSampler,
     min_depth: u32,
     max_depth: u32,
     rr_stop_prob: f32,
@@ -17,14 +17,14 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(
-        samples_per_pixel: u32,
+        sampler: StratifiedSampler,
         min_depth: u32,
         max_depth: u32,
         rr_stop_prob: f32,
         num_passes: usize,
     ) -> Self {
         Self {
-            samples_per_pixel,
+            sampler,
             min_depth,
             max_depth,
             rr_stop_prob,
@@ -88,20 +88,12 @@ impl Renderer {
             for x in 0..scene.camera.resolution.x {
                 let p_raster = vec2(x as f32, y as f32);
 
-                for _ in 0..self.samples_per_pixel {
-                    let p_film = p_raster + rng.gen::<Vec2>();
-                    let p_lens = rng.gen::<Vec2>();
-                    let time = rng.gen();
-
-                    let camera_sample = CameraSample {
-                        p_film,
-                        p_lens,
-                        time,
-                    };
-                    let ray = scene.camera.ray(&camera_sample);
+                let camera_samples = self.sampler.camera_samples(p_raster, &mut rng);
+                for sample in camera_samples {
+                    let ray = scene.camera.ray(&sample);
 
                     let li = self.pixel_color(scene, &ray, &mut rng, 0);
-                    film.add_sample(p_film, li.color, 1.0);
+                    film.add_sample(sample.p_film, li.color, 1.0);
                     rays += li.rays;
                 }
             }

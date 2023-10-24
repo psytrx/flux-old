@@ -8,6 +8,7 @@ mod materials;
 mod primitive;
 mod ray;
 mod render;
+mod sampler;
 mod scene;
 pub mod shapes;
 
@@ -17,6 +18,7 @@ pub use denoise::Denoiser;
 pub use materials::*;
 pub use primitive::Primitive;
 pub use render::Renderer;
+pub use sampler::StratifiedSampler;
 pub use scene::Scene;
 
 use std::f32::consts::PI;

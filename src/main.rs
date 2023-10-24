@@ -10,7 +10,7 @@ use num_format::{Locale, ToFormattedString};
 
 use crate::{
     example_scenes::{load_example_scene, ExampleScene},
-    flux::{Denoiser, Renderer},
+    flux::{Denoiser, Renderer, StratifiedSampler},
 };
 
 fn main() -> Result<()> {
@@ -29,7 +29,8 @@ fn main() -> Result<()> {
     };
 
     let samples_per_pixel = if debug_mode { 4 } else { 16 };
-    let renderer = Renderer::new(samples_per_pixel, 4, 16, 0.1, num_passes);
+    let sampler = StratifiedSampler::new(samples_per_pixel);
+    let renderer = Renderer::new(sampler, 4, 16, 0.1, num_passes);
 
     let t0 = std::time::Instant::now();
     let result = {
