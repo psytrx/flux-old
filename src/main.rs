@@ -22,7 +22,7 @@ fn main() -> Result<()> {
 
     let scene = {
         info!("Loading scene...");
-        load_example_scene(ExampleScene::ManySpheres)
+        load_example_scene(ExampleScene::DefocusBlur)
     };
 
     let renderer = Renderer::new(4, 4, 16, 0.1, num_passes);
