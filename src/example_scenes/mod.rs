@@ -43,8 +43,8 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
 
 pub fn material_demo_primitives() -> Vec<Primitive> {
     let mat_floor = {
-        let even = Rc::new(ConstantTexture::new(vec3(0.8, 0.8, 0.0)));
-        let odd = Rc::new(ConstantTexture::new(vec3(0.8, 0.0, 0.6)));
+        let even = Rc::new(ConstantTexture::new(Vec3::splat(0.7)));
+        let odd = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
         let tex = Rc::new(CheckerTexture::new(0.5, even, odd));
         Rc::new(MatteMaterial::new(tex))
     };
@@ -53,7 +53,7 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         Rc::new(DielectricMaterial::new(tex, 1.5))
     };
     let mat_center = {
-        let tex = Rc::new(ConstantTexture::new(vec3(0.1, 0.2, 0.5)));
+        let tex = Rc::new(ConstantTexture::new(vec3(0.2, 0.5, 0.1)));
         Rc::new(MatteMaterial::new(tex))
     };
     let mat_right = {
@@ -81,11 +81,11 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         Primitive::new(shape, mat_floor.clone())
     };
     let earth = {
-        let shape = Box::new(Sphere::new(vec3(0.0, 10.0, 10.0), 10.0));
+        let shape = Box::new(Sphere::new(vec3(0.0, 3.0, 4.0), 3.0));
         Primitive::new(shape, mat_earth.clone())
     };
     let left_sphere = {
-        let shape = Box::new(Sphere::new(vec3(-2.0, 1.0, 0.0), 1.0));
+        let shape = Box::new(Sphere::new(vec3(-2.5, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat_left.clone())
     };
     let center_sphere = {
@@ -93,15 +93,15 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         Primitive::new(shape, mat_center.clone())
     };
     let right_sphere = {
-        let shape = Box::new(Sphere::new(vec3(2.0, 1.0, 0.0), 1.0));
+        let shape = Box::new(Sphere::new(vec3(2.5, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat_right.clone())
     };
     let uv_sphere = {
-        let shape = Box::new(Sphere::new(vec3(0.5, 0.2, -1.5), 0.2));
+        let shape = Box::new(Sphere::new(vec3(-1.25, 0.5, -2.0), 0.5));
         Primitive::new(shape, mat_uv.clone())
     };
     let checkered_sphere = {
-        let shape = Box::new(Sphere::new(vec3(1.0, 0.2, -1.5), 0.2));
+        let shape = Box::new(Sphere::new(vec3(1.25, 0.5, -2.0), 0.5));
         Primitive::new(shape, mat_checkered.clone())
     };
 

@@ -6,10 +6,10 @@ use super::material_demo_primitives;
 
 pub fn material_demo() -> Scene {
     let camera = {
-        let resolution = uvec2(800, 450);
-        let look_from = vec3(0.0, 2.0, -8.0);
+        let resolution = uvec2(1024, 1024);
+        let look_from = vec3(0.0, 4.0, -8.0);
         let look_at = vec3(0.0, 2.0, 0.0);
-        let fov = 70.0;
+        let fov = 50.0;
 
         Camera::new(
             resolution,
