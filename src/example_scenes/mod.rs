@@ -13,7 +13,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         shapes::{Floor, Quad, Sphere},
-        textures::ConstantTexture,
+        textures::{CheckerTexture, ConstantTexture},
         Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
     },
 };
@@ -42,7 +42,9 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
 
 pub fn material_demo_primitives() -> Vec<Primitive> {
     let mat_floor = {
-        let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.8, 0.0)));
+        let even = Rc::new(ConstantTexture::new(vec3(0.8, 0.8, 0.0)));
+        let odd = Rc::new(ConstantTexture::new(vec3(0.8, 0.0, 0.6)));
+        let tex = Rc::new(CheckerTexture::new(0.5, even, odd));
         Rc::new(MatteMaterial::new(tex))
     };
     let mat_left = {
