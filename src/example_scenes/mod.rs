@@ -14,7 +14,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         shapes::{Floor, Quad, Sphere},
-        textures::{CheckerTexture, ConstantTexture, ImageTexture, UvTexture},
+        textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
         Bounds2, DielectricMaterial, MatteMaterial, MetalMaterial, Primitive, Scene,
     },
 };
@@ -48,6 +48,11 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         let tex = Rc::new(CheckerTexture::new(0.5, even, odd));
         Rc::new(MatteMaterial::new(tex))
     };
+    let mat_earth = {
+        let img = image::open("./assets/earthmap.jpg").unwrap();
+        let tex = Rc::new(ImageTexture::new(img));
+        Rc::new(MatteMaterial::new(tex))
+    };
     let mat_left = {
         let tex = Rc::new(ConstantTexture::new(Vec3::ONE));
         Rc::new(DielectricMaterial::new(tex, 1.5))
@@ -70,9 +75,8 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         let tex = Rc::new(CheckerTexture::new(0.1, even, odd));
         Rc::new(MatteMaterial::new(tex))
     };
-    let mat_earth = {
-        let img = image::open("./assets/earthmap.jpg").unwrap();
-        let tex = Rc::new(ImageTexture::new(img));
+    let mat_noise = {
+        let tex = Rc::new(NoiseTexture::new(0.025));
         Rc::new(MatteMaterial::new(tex))
     };
 
@@ -97,12 +101,16 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         Primitive::new(shape, mat_right.clone())
     };
     let uv_sphere = {
-        let shape = Box::new(Sphere::new(vec3(-1.25, 0.5, -2.0), 0.5));
+        let shape = Box::new(Sphere::new(vec3(-2.0, 0.5, -2.0), 0.5));
         Primitive::new(shape, mat_uv.clone())
     };
     let checkered_sphere = {
-        let shape = Box::new(Sphere::new(vec3(1.25, 0.5, -2.0), 0.5));
+        let shape = Box::new(Sphere::new(vec3(0.0, 0.5, -2.0), 0.5));
         Primitive::new(shape, mat_checkered.clone())
+    };
+    let noise_sphere = {
+        let shape = Box::new(Sphere::new(vec3(2.0, 0.5, -2.0), 0.5));
+        Primitive::new(shape, mat_noise.clone())
     };
 
     vec![
@@ -113,6 +121,7 @@ pub fn material_demo_primitives() -> Vec<Primitive> {
         right_sphere,
         uv_sphere,
         checkered_sphere,
+        noise_sphere,
     ]
 }
 
