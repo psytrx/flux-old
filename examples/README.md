@@ -2,16 +2,16 @@
 
 ## Cornell Box
 
-![Cornell Box](./img/cornell-box.png)
+![Cornell Box](./img/cornell_box.png)
 
 ## Material Demo
 
-![Material Demo](./img/material-demo.png)
+![Material Demo](./img/material_demo.png)
 
 ## Many Spheres
 
-![Many Spheres](./img/many-spheres.png)
+![Many Spheres](./img/many_spheres.png)
 
 ## Defocus Blur
 
-![Defocus Blur](./img/defocus-blur.png)
+![Defocus Blur](./img/defocus_blur.png)
