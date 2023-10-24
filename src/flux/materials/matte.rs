@@ -17,7 +17,7 @@ impl MatteMaterial {
 
 impl Material for MatteMaterial {
     fn scatter(&self, _ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
-        int.front_face.then(|| {
+        if int.front_face {
             let attenuation = self.albedo;
 
             let direction = int.n + uniform_sample_sphere(rng.gen());
@@ -28,10 +28,12 @@ impl Material for MatteMaterial {
             };
             let scattered = int.spawn_ray(direction);
 
-            ScatterRec {
+            Some(ScatterRec {
                 attenuation,
                 scattered,
-            }
-        })
+            })
+        } else {
+            None
+        }
     }
 }
