@@ -90,10 +90,13 @@ impl Renderer {
 
                 for _ in 0..self.samples_per_pixel {
                     let p_film = p_raster + rng.gen::<Vec2>();
+                    let p_lens = rng.gen::<Vec2>();
+                    let time = rng.gen();
 
                     let camera_sample = CameraSample {
                         p_film,
-                        time: rng.gen(),
+                        p_lens,
+                        time,
                     };
                     let ray = scene.camera.ray(&camera_sample);
 
