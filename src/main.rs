@@ -25,7 +25,7 @@ fn main() -> Result<()> {
 
     let scene = {
         info!("Loading scene...");
-        load_example_scene(ExampleScene::CornellBox)
+        load_example_scene(ExampleScene::MaterialDemo)
     };
 
     let samples_per_pixel = if debug_mode { 1 } else { 4 };
