@@ -13,7 +13,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         lights::{Light, SkyLight},
-        shapes::{Floor, Quad, Sphere},
+        shapes::{Floor, Quad, QuadBox, Sphere},
         textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
         Bounds2, DielectricMaterial, DiffuseLightMaterial, MatteMaterial, MetalMaterial, Primitive,
         Scene,
@@ -192,8 +192,19 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         let shape = Box::new(Quad::new([lf, rf, rb, lb]));
         Primitive::new(shape, light_mat.clone())
     };
+    let left_box = {
+        let size = box_size / 4.0 / 2.0;
+        let p = vec3(-size, -box_size / 2.0, -size);
+        let px = vec3(2.0 * size, 0.0, 0.0);
+        let py = vec3(0.0, 2.0 * size, 0.0);
+        let pz = vec3(0.0, 0.0, 2.0 * size);
+        let shape = Box::new(QuadBox::new(p, px, py, pz));
+        Primitive::new(shape, white_mat.clone())
+    };
 
-    vec![left_wall, right_wall, floor, ceiling, back_wall, light]
+    vec![
+        left_wall, right_wall, floor, ceiling, back_wall, light, left_box,
+    ]
 }
 
 pub fn sample_disks(
