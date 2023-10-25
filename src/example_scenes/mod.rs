@@ -150,6 +150,10 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         let tex = Rc::new(ConstantTexture::new(25.0 * Vec3::ONE));
         Rc::new(DiffuseLightMaterial::new(tex))
     };
+    let glass_mat = {
+        let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.8, 1.0)));
+        Rc::new(DielectricMaterial::new(tex, 1.5))
+    };
 
     let ulf = vec3(-box_size, box_size, -box_size) / 2.0;
     let dlf = vec3(-box_size, -box_size, -box_size) / 2.0;
@@ -212,9 +216,29 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         let shape = Box::new(Transform::new(transform, shape));
         Primitive::new(shape, white_mat.clone())
     };
+    let glass_sphere = {
+        let radius = box_size / 8.0;
+        let shape = Box::new(Sphere::new(
+            vec3(
+                box_size / 6.0,
+                -box_size / 2.0 + box_size / 3.0 + radius,
+                -box_size / 6.0,
+            ),
+            radius,
+        ));
+        Primitive::new(shape, glass_mat.clone())
+    };
 
     vec![
-        left_wall, right_wall, floor, ceiling, back_wall, light, left_box, right_box,
+        left_wall,
+        right_wall,
+        floor,
+        ceiling,
+        back_wall,
+        light,
+        left_box,
+        right_box,
+        glass_sphere,
     ]
 }
 
