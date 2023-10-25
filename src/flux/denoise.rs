@@ -15,7 +15,7 @@ pub struct Denoiser {
 }
 
 impl Denoiser {
-    pub unsafe fn new(resolution: UVec2) -> Self {
+    pub unsafe fn new(resolution: UVec2, albedo: &Film, normal: &Film) -> Self {
         let area = (resolution.x * resolution.y) as usize;
         let buffer_dim = area * 3 * std::mem::size_of::<f32>();
 
@@ -25,6 +25,8 @@ impl Denoiser {
         // create buffers for input/output images
 
         let color_buf = oidnNewBuffer(device, buffer_dim);
+        let albedo_buf = oidnNewBuffer(device, buffer_dim);
+        let normal_buf = oidnNewBuffer(device, buffer_dim);
         let output_buf = oidnNewBuffer(device, buffer_dim);
 
         // create filter for denoising the beauty image
@@ -34,6 +36,28 @@ impl Denoiser {
             color_filter,
             b"color\0" as *const _ as _,
             color_buf,
+            OIDNFormat_OIDN_FORMAT_FLOAT3,
+            resolution.x as _,
+            resolution.y as _,
+            0,
+            0,
+            0,
+        );
+        oidnSetFilterImage(
+            color_filter,
+            b"albedo\0" as *const _ as _,
+            albedo_buf,
+            OIDNFormat_OIDN_FORMAT_FLOAT3,
+            resolution.x as _,
+            resolution.y as _,
+            0,
+            0,
+            0,
+        );
+        oidnSetFilterImage(
+            color_filter,
+            b"normal\0" as *const _ as _,
+            normal_buf,
             OIDNFormat_OIDN_FORMAT_FLOAT3,
             resolution.x as _,
             resolution.y as _,
@@ -59,6 +83,9 @@ impl Denoiser {
         oidnSetFilterBool(color_filter, b"hdr\0" as *const _ as _, true);
 
         oidnCommitFilter(color_filter);
+
+        fill_buffer(albedo_buf, albedo);
+        fill_buffer(normal_buf, normal);
 
         Self {
             color_filter,

@@ -63,7 +63,7 @@ fn main() -> Result<()> {
     std::fs::copy("./output/output.png", "./output/output-raw.png")?;
 
     let denoised = {
-        let _albedo = {
+        let albedo = {
             let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()));
             result
                 .film
@@ -72,7 +72,7 @@ fn main() -> Result<()> {
             result.film
         };
 
-        {
+        let normal = {
             let result = render_aux(&scene, Box::new(NormalIntegrator::new()));
             result
                 .film
@@ -85,7 +85,7 @@ fn main() -> Result<()> {
         };
 
         unsafe {
-            let denoiser = Denoiser::new(scene.camera.resolution);
+            let denoiser = Denoiser::new(scene.camera.resolution, &albedo, &normal);
             denoiser.denoise(&result.film)
         }
     };
