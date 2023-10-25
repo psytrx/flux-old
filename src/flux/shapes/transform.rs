@@ -4,6 +4,9 @@ use embree4_sys::{
     RTCGeometry, RTCGeometryType,
 };
 use glam::{Affine3A, Vec2, Vec3};
+use log::trace;
+
+use crate::flux::interaction::Interaction;
 
 use super::Shape;
 
@@ -30,7 +33,6 @@ impl Shape for Transform {
 
         let instance = rtcNewGeometry(device, RTCGeometryType::INSTANCE);
         rtcSetGeometryInstancedScene(instance, sub_scene);
-        // rtcSetGeometryTimeStepCount(instance, 1);
 
         let xfm = self.transform.to_cols_array();
         let xfm_ptr = xfm.as_ptr();
@@ -47,5 +49,10 @@ impl Shape for Transform {
     fn uv(&self, _p: Vec3) -> Vec2 {
         // TODO: implement UV coordinates for Transform geometry
         Vec2::ZERO
+    }
+
+    fn adjust_interaction(&self, int: &mut Interaction) {
+        self.shape.adjust_interaction(int);
+        int.n = self.transform.transform_vector3(int.n);
     }
 }

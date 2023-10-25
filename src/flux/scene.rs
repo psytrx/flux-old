@@ -52,7 +52,7 @@ impl Scene {
 
             let uv = primitive.shape.uv(p);
 
-            Interaction {
+            let mut int = Interaction {
                 t,
                 p,
                 n,
@@ -60,7 +60,10 @@ impl Scene {
                 time: ray.time,
                 uv,
                 primitive,
-            }
+            };
+            primitive.shape.adjust_interaction(&mut int);
+
+            int
         })
     }
 }
