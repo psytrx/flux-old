@@ -2,12 +2,14 @@ mod floor;
 mod quad;
 mod quadbox;
 mod sphere;
+mod transform;
 mod trimesh;
 
 pub use floor::Floor;
 pub use quad::Quad;
 pub use quadbox::QuadBox;
 pub use sphere::Sphere;
+pub use transform::Transform;
 pub use trimesh::TriangleMesh;
 
 use embree4_sys::{RTCDevice, RTCGeometry};

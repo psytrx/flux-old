@@ -5,7 +5,7 @@ mod material_demo;
 
 use std::rc::Rc;
 
-use glam::{vec2, vec3, Vec2, Vec3};
+use glam::{vec2, vec3, Affine3A, Vec2, Vec3};
 use measure_time::debug_time;
 use rand::{rngs::StdRng, Rng};
 
@@ -13,7 +13,7 @@ use crate::{
     example_scenes::cornell_box::cornell_box,
     flux::{
         lights::{Light, SkyLight},
-        shapes::{Floor, Quad, QuadBox, Sphere},
+        shapes::{Floor, Quad, QuadBox, Sphere, Transform},
         textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
         Bounds2, DielectricMaterial, DiffuseLightMaterial, MatteMaterial, MetalMaterial, Primitive,
         Scene,
@@ -199,6 +199,8 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         let py = vec3(0.0, 2.0 * size, 0.0);
         let pz = vec3(0.0, 0.0, 2.0 * size);
         let shape = Box::new(QuadBox::new(p, px, py, pz));
+        let transform = Affine3A::from_rotation_y(1.0);
+        let shape = Box::new(Transform::new(transform, shape));
         Primitive::new(shape, white_mat.clone())
     };
 
