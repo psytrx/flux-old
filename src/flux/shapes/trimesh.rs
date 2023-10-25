@@ -18,7 +18,7 @@ impl TriangleMesh {
 }
 
 impl Shape for TriangleMesh {
-    unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
+    unsafe fn build_geometry(&self, _id: u32, device: RTCDevice) -> RTCGeometry {
         let geometry = rtcNewGeometry(device, RTCGeometryType::TRIANGLE);
 
         let vertex_buf_ptr = rtcSetNewGeometryBuffer(

@@ -29,8 +29,8 @@ impl QuadBox {
 }
 
 impl Shape for QuadBox {
-    unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
-        self.mesh.build_geometry(device)
+    unsafe fn build_geometry(&self, id: u32, device: RTCDevice) -> RTCGeometry {
+        self.mesh.build_geometry(id, device)
     }
 
     fn uv(&self, p: Vec3) -> glam::Vec2 {

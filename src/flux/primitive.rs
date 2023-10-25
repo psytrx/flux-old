@@ -14,7 +14,7 @@ impl Primitive {
         Self { shape, material }
     }
 
-    pub unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
-        self.shape.build_geometry(device)
+    pub unsafe fn build_geometry(&self, id: u32, device: RTCDevice) -> RTCGeometry {
+        self.shape.build_geometry(id, device)
     }
 }

@@ -18,7 +18,7 @@ impl Floor {
 }
 
 impl Shape for Floor {
-    unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
+    unsafe fn build_geometry(&self, _id: u32, device: RTCDevice) -> RTCGeometry {
         let geometry = rtcNewGeometry(device, RTCGeometryType::USER);
 
         rtcSetGeometryUserPrimitiveCount(geometry, 1);

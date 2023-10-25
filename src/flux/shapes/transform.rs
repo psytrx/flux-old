@@ -1,7 +1,7 @@
 use embree4_sys::{
-    rtcAttachGeometry, rtcCommitGeometry, rtcCommitScene, rtcNewGeometry, rtcNewScene,
-    rtcReleaseGeometry, rtcSetGeometryInstancedScene,
-    rtcSetGeometryTransform, RTCDevice, RTCGeometry, RTCGeometryType,
+    rtcAttachGeometryByID, rtcCommitGeometry, rtcCommitScene, rtcNewGeometry, rtcNewScene,
+    rtcReleaseGeometry, rtcSetGeometryInstancedScene, rtcSetGeometryTransform, RTCDevice,
+    RTCGeometry, RTCGeometryType,
 };
 use glam::{Affine3A, Vec2, Vec3};
 
@@ -19,12 +19,12 @@ impl Transform {
 }
 
 impl Shape for Transform {
-    unsafe fn build_geometry(&self, device: RTCDevice) -> RTCGeometry {
-        let shape_geom = self.shape.build_geometry(device);
+    unsafe fn build_geometry(&self, id: u32, device: RTCDevice) -> RTCGeometry {
+        let shape_geom = self.shape.build_geometry(id, device);
         rtcCommitGeometry(shape_geom);
 
         let sub_scene = rtcNewScene(device);
-        rtcAttachGeometry(sub_scene, shape_geom);
+        rtcAttachGeometryByID(sub_scene, shape_geom, id);
         rtcReleaseGeometry(shape_geom);
         rtcCommitScene(sub_scene);
 
@@ -45,6 +45,7 @@ impl Shape for Transform {
     }
 
     fn uv(&self, _p: Vec3) -> Vec2 {
-        todo!()
+        // TODO: implement UV coordinates for Transform geometry
+        Vec2::ZERO
     }
 }

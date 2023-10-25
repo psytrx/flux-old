@@ -23,7 +23,7 @@ impl EmbreeAccel {
 
         for (id, prim) in primitives.iter().enumerate() {
             let geometry_id = id as u32;
-            let geometry = prim.build_geometry(device);
+            let geometry = prim.build_geometry(id as u32, device);
 
             rtcCommitGeometry(geometry);
             rtcAttachGeometryByID(scene, geometry, geometry_id);
