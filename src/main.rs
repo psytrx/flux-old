@@ -4,12 +4,16 @@ mod example_scenes;
 mod flux;
 
 use anyhow::Result;
+use flux::{integrators::Integrator, RenderResult, Scene};
 use log::{debug, info};
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
     example_scenes::{load_example_scene, ExampleScene},
-    flux::{integrators::PathTracingIntegrator, Denoiser, Renderer, StratifiedSampler},
+    flux::{
+        integrators::{AlbedoIntegrator, NormalIntegrator, PathTracingIntegrator},
+        Denoiser, Renderer, StratifiedSampler,
+    },
 };
 
 fn main() -> Result<()> {
@@ -58,11 +62,40 @@ fn main() -> Result<()> {
     result.film.to_srgb_image().save("./output/output.png")?;
     std::fs::copy("./output/output.png", "./output/output-raw.png")?;
 
-    unsafe {
-        let denoiser = Denoiser::new(scene.camera.resolution);
-        let denoised = denoiser.denoise(&result.film);
-        denoised.to_srgb_image().save("./output/output.png")?;
-    }
+    let denoised = {
+        let _albedo = {
+            let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()));
+            result
+                .film
+                .to_srgb_image()
+                .save("./output/output-albedo.png")?;
+            result.film
+        };
+
+        {
+            let result = render_aux(&scene, Box::new(NormalIntegrator::new()));
+            result
+                .film
+                .to_srgb_image()
+                .save("./output/output-normal.png")?;
+        };
+
+        unsafe {
+            let denoiser = Denoiser::new(scene.camera.resolution);
+            denoiser.denoise(&result.film)
+        }
+    };
+
+    denoised.to_srgb_image().save("./output/output.png")?;
 
     Ok(())
+}
+
+fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>) -> RenderResult {
+    let sampler = StratifiedSampler::new(4);
+
+    let passes = num_cpus::get();
+    let renderer = Renderer::new(integrator, sampler, passes);
+
+    renderer.render_film(scene)
 }

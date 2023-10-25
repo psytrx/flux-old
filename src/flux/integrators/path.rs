@@ -42,7 +42,6 @@ impl PathTracingIntegrator {
             1.0
         };
 
-        let rays = 1;
         match scene.intersect(ray) {
             Some(int) => {
                 let le = int.primitive.material.emitted(&int);
@@ -52,12 +51,12 @@ impl PathTracingIntegrator {
                         let result = self.li_internal(scene, &srec.scattered, rng, depth + 1);
                         LiResult {
                             li: rr_factor * (le + srec.attenuation * result.li),
-                            rays: rays + result.rays,
+                            rays: 1 + result.rays,
                         }
                     }
                     None => LiResult {
                         li: rr_factor * le,
-                        rays,
+                        rays: 1,
                     },
                 }
             }
@@ -66,7 +65,7 @@ impl PathTracingIntegrator {
                     scene.lights.iter().map(|light| light.le(ray)).sum::<Vec3>();
                 LiResult {
                     li: rr_factor * background_radiance,
-                    rays,
+                    rays: 1,
                 }
             }
         }
