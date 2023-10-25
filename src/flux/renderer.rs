@@ -1,33 +1,27 @@
 use std::sync::{Arc, Mutex};
 
-use glam::{vec2, UVec2, Vec3};
+use glam::{vec2, UVec2};
 use log::debug;
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{rngs::StdRng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use super::{film::Film, ray::Ray, sampler::StratifiedSampler, Scene};
+use super::{film::Film, integrators::Integrator, sampler::StratifiedSampler, Scene};
 
 pub struct Renderer {
+    integrator: Box<dyn Integrator>,
     sampler: StratifiedSampler,
-    min_depth: u32,
-    max_depth: u32,
-    rr_stop_prob: f32,
     num_passes: usize,
 }
 
 impl Renderer {
     pub fn new(
+        integrator: Box<dyn Integrator>,
         sampler: StratifiedSampler,
-        min_depth: u32,
-        max_depth: u32,
-        rr_stop_prob: f32,
         num_passes: usize,
     ) -> Self {
         Self {
+            integrator,
             sampler,
-            min_depth,
-            max_depth,
-            rr_stop_prob,
             num_passes,
         }
     }
@@ -92,72 +86,15 @@ impl Renderer {
                 for sample in camera_samples {
                     let ray = scene.camera.ray(&sample);
 
-                    let li = self.pixel_color(scene, &ray, &mut rng, 0);
-                    film.add_sample(sample.p_film, li.color, 1.0);
-                    rays += li.rays;
+                    let result = self.integrator.li(scene, &ray, &mut rng);
+                    film.add_sample(sample.p_film, result.li, 1.0);
+                    rays += result.rays;
                 }
             }
         }
 
         RenderResult { film, rays }
     }
-
-    fn pixel_color(&self, scene: &Scene, ray: &Ray, rng: &mut StdRng, depth: u32) -> ColorResult {
-        if depth > self.max_depth {
-            return ColorResult {
-                color: Vec3::ZERO,
-                rays: 0,
-            };
-        }
-
-        let rr_factor = if depth > self.min_depth {
-            let q = 1.0 - self.rr_stop_prob;
-            let s: f32 = rng.gen();
-            if s < q {
-                return ColorResult {
-                    color: Vec3::ZERO,
-                    rays: 0,
-                };
-            }
-            1.0 / q
-        } else {
-            1.0
-        };
-
-        let rays = 1;
-        match scene.intersect(ray) {
-            Some(int) => {
-                let le = int.primitive.material.emitted(&int);
-
-                match int.primitive.material.scatter(ray, &int, rng) {
-                    Some(srec) => {
-                        let li = self.pixel_color(scene, &srec.scattered, rng, depth + 1);
-                        ColorResult {
-                            color: rr_factor * (le + srec.attenuation * li.color),
-                            rays: rays + li.rays,
-                        }
-                    }
-                    None => ColorResult {
-                        color: rr_factor * le,
-                        rays,
-                    },
-                }
-            }
-            None => {
-                let background_radiance =
-                    scene.lights.iter().map(|light| light.le(ray)).sum::<Vec3>();
-                ColorResult {
-                    color: rr_factor * background_radiance,
-                    rays,
-                }
-            }
-        }
-    }
-}
-
-struct ColorResult {
-    color: Vec3,
-    rays: usize,
 }
 
 pub struct RenderResult {

@@ -5,12 +5,11 @@ mod flux;
 
 use anyhow::Result;
 use log::{debug, info};
-
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
     example_scenes::{load_example_scene, ExampleScene},
-    flux::{Denoiser, Renderer, StratifiedSampler},
+    flux::{integrators::PathTracingIntegrator, Denoiser, Renderer, StratifiedSampler},
 };
 
 fn main() -> Result<()> {
@@ -25,12 +24,17 @@ fn main() -> Result<()> {
 
     let scene = {
         info!("Loading scene...");
-        load_example_scene(ExampleScene::MaterialDemo)
+        load_example_scene(ExampleScene::CornellBox)
     };
 
-    let samples_per_pixel = if debug_mode { 1 } else { 4 };
-    let sampler = StratifiedSampler::new(samples_per_pixel);
-    let renderer = Renderer::new(sampler, 8, 32, 0.1, num_passes);
+    let renderer = {
+        let integrator = Box::new(PathTracingIntegrator::new(8, 32, 0.1));
+
+        let samples_per_pixel = if debug_mode { 1 } else { 4 };
+        let sampler = StratifiedSampler::new(samples_per_pixel);
+
+        Renderer::new(integrator, sampler, num_passes)
+    };
 
     let t0 = std::time::Instant::now();
     let result = {
