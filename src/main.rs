@@ -78,6 +78,10 @@ fn main() -> Result<()> {
                 .film
                 .to_srgb_image()
                 .save("./output/output-normal.png")?;
+
+            // OIDN expects normals to be in range [-1, 1], but the integrator generates colors in
+            // range [0, 1], so we scale the normals here.
+            result.film.mapped(|s| s * 2.0 - 1.0)
         };
 
         unsafe {

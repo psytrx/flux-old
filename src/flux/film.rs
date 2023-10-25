@@ -33,6 +33,24 @@ impl Film {
         Self { resolution, pixels }
     }
 
+    pub fn mapped(&self, f: impl Fn(Vec3) -> Vec3) -> Self {
+        let mut pixels = vec![Pixel::ZERO; (self.resolution.x * self.resolution.y) as usize];
+        for y in 0..self.resolution.y {
+            for x in 0..self.resolution.x {
+                let color = self.pixel(x, y).color();
+                let color = f(color);
+
+                let index = self.index(x, y);
+                pixels[index] = Pixel {
+                    color_sum: color,
+                    weight_sum: 1.0,
+                };
+            }
+        }
+
+        Self::from_pixels(self.resolution, pixels)
+    }
+
     fn index(&self, x: u32, y: u32) -> usize {
         assert!(x <= self.resolution.x && y <= self.resolution.y);
 
