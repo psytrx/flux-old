@@ -147,7 +147,7 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         Rc::new(MatteMaterial::new(tex))
     };
     let light_mat = {
-        let tex = Rc::new(ConstantTexture::new(15.0 * Vec3::ONE));
+        let tex = Rc::new(ConstantTexture::new(25.0 * Vec3::ONE));
         Rc::new(DiffuseLightMaterial::new(tex))
     };
 
