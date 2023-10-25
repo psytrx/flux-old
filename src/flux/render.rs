@@ -55,7 +55,7 @@ impl Renderer {
             let mut rays = rays.lock().unwrap();
             *rays += result.rays;
 
-            if *passes_merged % num_cpus == 0 {
+            if *passes_merged % num_cpus == 0 && *passes_merged < self.num_passes {
                 let mut last_update = last_update.lock().unwrap();
                 if last_update.elapsed() > std::time::Duration::from_secs(1) {
                     merged_film
