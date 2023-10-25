@@ -22,7 +22,7 @@ impl EmbreeAccel {
         rtcSetSceneFlags(scene, RTCSceneFlags::ROBUST);
 
         for (id, prim) in primitives.iter().enumerate() {
-            let geometry_id = (id + 1) as u32;
+            let geometry_id = id as u32;
             let geometry = prim.build_geometry(device);
 
             rtcCommitGeometry(geometry);

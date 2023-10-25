@@ -47,7 +47,7 @@ impl Scene {
             let front_face = ray.direction.dot(n) < 0.0;
             let n = if front_face { n } else { -n };
 
-            let prim_idx = (ray_hit.hit.geomID - 1) as usize;
+            let prim_idx = ray_hit.hit.geomID as usize;
             let primitive = &self.primitives[prim_idx];
 
             let uv = primitive.shape.uv(p);
