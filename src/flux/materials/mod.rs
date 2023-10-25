@@ -18,12 +18,21 @@ pub struct ScatterRec {
     pub scattered: Ray,
 }
 
+#[derive(PartialEq)]
+pub enum BxdfType {
+    Diffuse,
+    Specular,
+    Other,
+}
+
 pub trait Material {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec>;
 
     fn emitted(&self, _int: &Interaction) -> Vec3 {
         Vec3::ZERO
     }
+
+    fn bxdf_type(&self) -> BxdfType;
 }
 
 pub fn is_near_zero(v: Vec3) -> bool {

@@ -5,7 +5,7 @@ use rand::rngs::StdRng;
 
 use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture};
 
-use super::{Material, ScatterRec};
+use super::{BxdfType, Material, ScatterRec};
 
 pub struct DiffuseLightMaterial {
     emit: Rc<dyn Texture<Vec3>>,
@@ -24,5 +24,9 @@ impl Material for DiffuseLightMaterial {
 
     fn emitted(&self, int: &Interaction) -> Vec3 {
         self.emit.evaluate(int)
+    }
+
+    fn bxdf_type(&self) -> BxdfType {
+        BxdfType::Other
     }
 }

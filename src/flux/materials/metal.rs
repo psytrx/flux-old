@@ -5,7 +5,7 @@ use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture, uniform_sample_sphere};
 
-use super::{reflect, Material, ScatterRec};
+use super::{reflect, BxdfType, Material, ScatterRec};
 
 pub struct MetalMaterial {
     kd: Rc<dyn Texture<Vec3>>,
@@ -36,5 +36,9 @@ impl Material for MetalMaterial {
         } else {
             None
         }
+    }
+
+    fn bxdf_type(&self) -> BxdfType {
+        BxdfType::Specular
     }
 }

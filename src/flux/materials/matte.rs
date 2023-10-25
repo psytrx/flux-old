@@ -5,7 +5,7 @@ use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture, uniform_sample_sphere};
 
-use super::{is_near_zero, Material, ScatterRec};
+use super::{is_near_zero, BxdfType, Material, ScatterRec};
 
 pub struct MatteMaterial {
     kd: Rc<dyn Texture<Vec3>>,
@@ -33,5 +33,9 @@ impl Material for MatteMaterial {
             attenuation,
             scattered,
         })
+    }
+
+    fn bxdf_type(&self) -> BxdfType {
+        BxdfType::Diffuse
     }
 }

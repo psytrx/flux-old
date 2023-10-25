@@ -5,7 +5,7 @@ use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture};
 
-use super::{reflect, refract, Material, ScatterRec};
+use super::{reflect, refract, BxdfType, Material, ScatterRec};
 
 pub struct DielectricMaterial {
     kd: Rc<dyn Texture<Vec3>>,
@@ -59,6 +59,10 @@ impl Material for DielectricMaterial {
             attenuation,
             scattered,
         })
+    }
+
+    fn bxdf_type(&self) -> BxdfType {
+        BxdfType::Other
     }
 }
 
