@@ -5,7 +5,7 @@ mod material_demo;
 
 use std::rc::Rc;
 
-use glam::{vec2, vec3, Affine3A, Vec2, Vec3};
+use glam::{vec2, vec3, Affine3A, Quat, Vec2, Vec3};
 use measure_time::debug_time;
 use rand::{rngs::StdRng, Rng};
 
@@ -193,19 +193,28 @@ pub fn empty_cornell_box_primitives(box_size: f32) -> Vec<Primitive> {
         Primitive::new(shape, light_mat.clone())
     };
     let left_box = {
-        let size = box_size / 4.0 / 2.0;
-        let p = vec3(-size, -box_size / 2.0, -size);
-        let px = vec3(2.0 * size, 0.0, 0.0);
-        let py = vec3(0.0, 2.0 * size, 0.0);
-        let pz = vec3(0.0, 0.0, 2.0 * size);
-        let shape = Box::new(QuadBox::new(p, px, py, pz));
-        let transform = Affine3A::from_rotation_y(1.0);
+        let size = box_size / 3.0;
+        let shape = Box::new(QuadBox::new(size, 2.0 * size, size));
+        let transform = Affine3A::from_rotation_translation(
+            Quat::from_rotation_y(-20_f32.to_radians()),
+            vec3(-0.5 * size, -0.5 * size, 0.25 * size),
+        );
+        let shape = Box::new(Transform::new(transform, shape));
+        Primitive::new(shape, white_mat.clone())
+    };
+    let right_box = {
+        let size = box_size / 3.0;
+        let shape = Box::new(QuadBox::new(size, size, size));
+        let transform = Affine3A::from_rotation_translation(
+            Quat::from_rotation_y(20_f32.to_radians()),
+            vec3(0.5 * size, -1.0 * size, -0.5 * size),
+        );
         let shape = Box::new(Transform::new(transform, shape));
         Primitive::new(shape, white_mat.clone())
     };
 
     vec![
-        left_wall, right_wall, floor, ceiling, back_wall, light, left_box,
+        left_wall, right_wall, floor, ceiling, back_wall, light, left_box, right_box,
     ]
 }
 

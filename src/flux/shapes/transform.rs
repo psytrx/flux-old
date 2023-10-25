@@ -4,7 +4,7 @@ use embree4_sys::{
     RTCGeometry, RTCGeometryType,
 };
 use glam::{Affine3A, Vec2, Vec3};
-use log::trace;
+
 
 use crate::flux::interaction::Interaction;
 
