@@ -19,23 +19,19 @@ impl MatteMaterial {
 
 impl Material for MatteMaterial {
     fn scatter(&self, _ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
-        if int.front_face {
-            let attenuation = self.kd.evaluate(int);
+        let attenuation = self.kd.evaluate(int);
 
-            let direction = int.n + uniform_sample_sphere(rng.gen());
-            let direction = if is_near_zero(direction) {
-                int.n
-            } else {
-                direction
-            };
-            let scattered = int.spawn_ray(direction);
-
-            Some(ScatterRec {
-                attenuation,
-                scattered,
-            })
+        let direction = int.n + uniform_sample_sphere(rng.gen());
+        let direction = if is_near_zero(direction) {
+            int.n
         } else {
-            None
-        }
+            direction
+        };
+        let scattered = int.spawn_ray(direction);
+
+        Some(ScatterRec {
+            attenuation,
+            scattered,
+        })
     }
 }

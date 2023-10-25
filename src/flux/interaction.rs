@@ -6,7 +6,6 @@ pub struct Interaction<'a> {
     pub t: f32,
     pub p: Vec3,
     pub n: Vec3,
-    pub front_face: bool,
     pub time: f32,
     pub uv: Vec2,
     pub primitive: &'a Primitive,

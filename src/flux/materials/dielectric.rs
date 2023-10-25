@@ -22,11 +22,8 @@ impl Material for DielectricMaterial {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
         let attenuation = self.kd.evaluate(int);
 
-        let refraction_ratio = if int.front_face {
-            1.0 / self.ior
-        } else {
-            self.ior
-        };
+        let front_face = ray.direction.dot(int.n) < 0.0;
+        let refraction_ratio = if front_face { 1.0 / self.ior } else { self.ior };
 
         // INFO: We expect ray directions to be normalized. See Scene::intersect, where we
         // normalize the normal vector by default.
@@ -47,11 +44,6 @@ impl Material for DielectricMaterial {
             // ray in the correct direction.
             // TODO: avoid this allocation, maybe pass an extra paramter into
             // Interaction::spawn_ray to flip the direction?
-            let int = Interaction {
-                front_face: !int.front_face,
-                n: -int.n,
-                ..*int
-            };
             int.spawn_ray(direction)
         };
 

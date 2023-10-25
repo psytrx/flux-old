@@ -44,8 +44,6 @@ impl Scene {
             let p = ray.at(t);
 
             let n = vec3(ray_hit.hit.Ng_x, ray_hit.hit.Ng_y, ray_hit.hit.Ng_z).normalize();
-            let front_face = ray.direction.dot(n) < 0.0;
-            let n = if front_face { n } else { -n };
 
             let prim_idx = ray_hit.hit.geomID as usize;
             let primitive = &self.primitives[prim_idx];
@@ -56,7 +54,6 @@ impl Scene {
                 t,
                 p,
                 n,
-                front_face,
                 time: ray.time,
                 uv,
                 primitive,

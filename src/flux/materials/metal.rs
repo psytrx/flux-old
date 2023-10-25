@@ -20,23 +20,19 @@ impl MetalMaterial {
 
 impl Material for MetalMaterial {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
-        if int.front_face {
-            let attenuation = self.kd.evaluate(int);
+        let attenuation = self.kd.evaluate(int);
 
-            let reflected = reflect(ray.direction.normalize(), int.n);
-            let direction = reflected + self.fuzz * uniform_sample_sphere(rng.gen());
+        let reflected = reflect(ray.direction.normalize(), int.n);
+        let direction = reflected + self.fuzz * uniform_sample_sphere(rng.gen());
 
-            // Rays scattering to below the originating surface will be cancelled
-            let above_surface = direction.dot(int.n) > 0.0;
-            if above_surface {
-                let scattered = int.spawn_ray(direction);
-                Some(ScatterRec {
-                    attenuation,
-                    scattered,
-                })
-            } else {
-                None
-            }
+        // Rays scattering to below the originating surface will be cancelled
+        let above_surface = direction.dot(int.n) > 0.0;
+        if above_surface {
+            let scattered = int.spawn_ray(direction);
+            Some(ScatterRec {
+                attenuation,
+                scattered,
+            })
         } else {
             None
         }
