@@ -22,13 +22,13 @@ fn main() -> Result<()> {
     let args = std::env::args().collect::<Vec<_>>();
     let debug_mode = args.contains(&String::from("--dev"));
 
-    let sweeps = if debug_mode { 1 } else { 8 };
+    let sweeps = if debug_mode { 1 } else { 4 };
     let num_cpus = num_cpus::get();
     let num_passes = sweeps * num_cpus;
 
     let scene = {
         info!("Loading scene...");
-        load_example_scene(ExampleScene::CornellBox)
+        load_example_scene(ExampleScene::DefocusBlur)
     };
 
     let renderer = {
