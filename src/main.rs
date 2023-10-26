@@ -23,11 +23,7 @@ fn main() -> Result<()> {
     let t0_main = std::time::Instant::now();
 
     let args = std::env::args().collect::<Vec<_>>();
-    let debug_mode = args.contains(&String::from("--dev"));
-
-    let sweeps = if debug_mode { 1 } else { 4 };
-    let num_cpus = num_cpus::get();
-    let num_passes = sweeps * num_cpus;
+    let dev_mode = args.contains(&String::from("--dev"));
 
     let scene = {
         info!("loading scene...");
@@ -37,8 +33,12 @@ fn main() -> Result<()> {
     let renderer = {
         let integrator = Box::new(PathTracingIntegrator::new(8, 32, 0.1));
 
-        let samples_per_pixel = if debug_mode { 1 } else { 4 };
+        let samples_per_pixel = if dev_mode { 1 } else { 4 };
         let sampler = StratifiedSampler::new(samples_per_pixel);
+
+        let sweeps = if dev_mode { 1 } else { 4 };
+        let num_cpus = num_cpus::get();
+        let num_passes = sweeps * num_cpus;
 
         Renderer::new(integrator, sampler, num_passes)
     };
@@ -72,7 +72,7 @@ fn main() -> Result<()> {
         let albedo = {
             trace_time!("rendering albedo channel");
 
-            let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()));
+            let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()), dev_mode);
             result
                 .film
                 .to_srgb_image()
@@ -83,7 +83,7 @@ fn main() -> Result<()> {
         let normal = {
             trace_time!("rendering normal channel");
 
-            let result = render_aux(&scene, Box::new(NormalIntegrator::new()));
+            let result = render_aux(&scene, Box::new(NormalIntegrator::new()), dev_mode);
             result
                 .film
                 .to_srgb_image()
@@ -108,8 +108,9 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>) -> RenderResult {
-    let sampler = StratifiedSampler::new(4);
+fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) -> RenderResult {
+    let samples_per_pixel = if dev_mode { 4 } else { 16 };
+    let sampler = StratifiedSampler::new(samples_per_pixel);
 
     let passes = num_cpus::get();
     let renderer = Renderer::new(integrator, sampler, passes);
