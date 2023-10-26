@@ -64,6 +64,8 @@ unsafe extern "C" fn intersect_fn(args: *const RTCIntersectFunctionNArguments) {
         return;
     }
 
+    ray_hit.hit.Ng_x = 0.0;
+    ray_hit.hit.Ng_z = 0.0;
     if ray_hit.ray.org_y > 0.0 {
         ray_hit.hit.Ng_y = 1.0;
     } else {
