@@ -17,8 +17,10 @@ impl ImageTexture {
 
 impl Texture<Vec3> for ImageTexture {
     fn evaluate(&self, int: &Interaction) -> Vec3 {
-        let u = int.uv.x * self.img.width() as f32;
-        let v = (1.0 - int.uv.y) * self.img.height() as f32;
+        let uv = int.primitive.shape.uv(int.p);
+
+        let u = uv.x * self.img.width() as f32;
+        let v = (1.0 - uv.y) * self.img.height() as f32;
 
         let x0 = u.floor();
         let y0 = v.floor();

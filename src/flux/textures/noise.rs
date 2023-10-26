@@ -27,9 +27,10 @@ impl NoiseTexture {
 
 impl Texture<Vec3> for NoiseTexture {
     fn evaluate(&self, int: &Interaction) -> Vec3 {
+        let uv = int.primitive.shape.uv(int.p);
         let (width, height) = self.noise.size();
-        let x = (int.uv.x * width as f32) as usize;
-        let y = (int.uv.y * height as f32) as usize;
+        let x = (uv.x * width as f32) as usize;
+        let y = (uv.y * height as f32) as usize;
 
         let v = self.noise.get_value(x, y) as f32;
         // Map [-1, 1] to [0, 1]

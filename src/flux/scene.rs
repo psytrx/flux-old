@@ -39,7 +39,9 @@ impl Scene {
 
         unsafe { rtcIntersect1(self.accel.scene, &mut ray_hit, null_mut()) };
 
-        (ray_hit.hit.geomID != RTC_INVALID_GEOMETRY_ID).then(|| {
+        if ray_hit.hit.geomID == RTC_INVALID_GEOMETRY_ID {
+            None
+        } else {
             let t = ray_hit.ray.tfar;
             let p = ray.at(t);
 
@@ -48,19 +50,16 @@ impl Scene {
             let prim_idx = ray_hit.hit.geomID as usize;
             let primitive = &self.primitives[prim_idx];
 
-            let uv = primitive.shape.uv(p);
-
             let mut int = Interaction {
                 t,
                 p,
                 n,
                 time: ray.time,
-                uv,
                 primitive,
             };
             primitive.shape.adjust_interaction(&mut int);
 
-            int
-        })
+            Some(int)
+        }
     }
 }

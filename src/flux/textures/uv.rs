@@ -14,6 +14,7 @@ impl UvTexture {
 
 impl Texture<Vec3> for UvTexture {
     fn evaluate(&self, int: &Interaction) -> Vec3 {
-        vec3(int.uv.x, 0.0, int.uv.y)
+        let uv = int.primitive.shape.uv(int.p);
+        vec3(uv.x, 0.0, uv.y)
     }
 }
