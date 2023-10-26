@@ -3,7 +3,7 @@ use std::rc::Rc;
 use glam::{uvec2, vec3, Affine3A, Quat, Vec3};
 
 use crate::{
-    example_scenes::util::load_ply,
+    example_scenes::util::{hdr_light_dome, load_ply},
     flux::{
         shapes::{Floor, Sphere, Transform, TriangleMesh},
         textures::ConstantTexture,
@@ -11,8 +11,6 @@ use crate::{
         Scene,
     },
 };
-
-use super::default_sky_light;
 
 pub fn dragon() -> Scene {
     let camera = {
@@ -31,7 +29,7 @@ pub fn dragon() -> Scene {
 
     let aggregate = build_aggregate();
 
-    let lights = vec![default_sky_light()];
+    let lights = vec![];
 
     Scene::new(camera, aggregate, lights)
 }
@@ -69,11 +67,11 @@ fn build_aggregate() -> Vec<Primitive> {
             let tex = Rc::new(ConstantTexture::new(vec3(100.0, 50.0, 25.0)));
             Rc::new(DiffuseLightMaterial::new(tex))
         };
-        let shape = Box::new(Sphere::new(vec3(-50.0, 50.0, 50.0), 10.0));
+        let shape = Box::new(Sphere::new(vec3(-40.0, 40.0, 50.0), 5.0));
         Primitive::new(shape, mat)
     };
 
-    // let light_dome = hdr_light_dome("./assets/lightprobes/ennis.exr");
+    let light_dome = hdr_light_dome("./assets/lightprobes/ennis.exr");
 
-    vec![floor, dragon, sphere_light]
+    vec![floor, dragon, sphere_light, light_dome]
 }

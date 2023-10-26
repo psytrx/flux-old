@@ -13,7 +13,7 @@
 ## Dragon
 
 ![Dragon](./img/dragon.png)
-*256 SPP, 730m rays, 13s, 50m RPS*¹
+*256 SPP, 730m rays, 17s, 40m RPS*¹
 
 ## Material Demo
 
