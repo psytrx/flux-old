@@ -3,12 +3,12 @@ use std::rc::Rc;
 use glam::{vec3, Affine3A, Quat, Vec3};
 
 use crate::flux::{
-    shapes::{QuadBox, Sphere, Transform},
+    shapes::{QuadBox, Sphere, SubdivisionMesh, Transform},
     textures::ConstantTexture,
     DielectricMaterial, DiffuseLightMaterial, MetalMaterial, Primitive, Scene,
 };
 
-use super::util::{build_matte_constant, cornell_box_aggregate, cornell_box_camera};
+use super::util::{build_matte_constant, cornell_box_aggregate, cornell_box_camera, load_ply};
 
 pub fn cornell_box() -> Scene {
     let box_size = 100.0;
@@ -65,7 +65,7 @@ fn build_aggregate(box_size: f32) -> Vec<Primitive> {
     let metal_spheres = {
         (0..3).map(|i| {
             let radius = box_size / 20.0;
-            let fuzz = 0.1 * (i + 1) as f32;
+            let fuzz = 0.25 * (i + 1) as f32;
             let mat = {
                 let tex = Rc::new(ConstantTexture::new(vec3(
                     if i % 3 == 0 { 0.8 } else { 0.1 },
@@ -99,8 +99,25 @@ fn build_aggregate(box_size: f32) -> Vec<Primitive> {
         Primitive::new(shape, glass_mat)
     };
 
+    let ruby_dragon = {
+        let mat = {
+            let tex = Rc::new(ConstantTexture::new(vec3(1.0, 0.2, 0.4)));
+            Rc::new(DielectricMaterial::new(tex, 1.77))
+        };
+
+        let result = load_ply("./assets/dragon/dragon_vrip_res2.ply").unwrap();
+        let shape = Box::new(SubdivisionMesh::new(2.0, result.vertices, result.indices));
+        let transform = Affine3A::from_scale_rotation_translation(
+            Vec3::splat(200.0),
+            Quat::from_rotation_y((-55_f32).to_radians()),
+            vec3(-0.15 * box_size, 0.065 * box_size, 0.115 * box_size),
+        );
+        let shape = Box::new(Transform::new(transform, shape));
+        Primitive::new(shape, mat)
+    };
+
     let mut aggregate = cornell_box_aggregate(box_size);
-    aggregate.extend([left_box, right_box, glass_sphere, glow_sphere]);
+    aggregate.extend([left_box, right_box, glass_sphere, glow_sphere, ruby_dragon]);
     aggregate.extend(metal_spheres);
     aggregate
 }
