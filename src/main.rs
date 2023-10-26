@@ -96,6 +96,7 @@ fn main() -> Result<()> {
 
         unsafe {
             let denoiser = Denoiser::new(scene.camera.resolution, &albedo, &normal);
+            trace_time!("denoise filter");
             denoiser.denoise(&result.film)
         }
     };
@@ -109,7 +110,7 @@ fn main() -> Result<()> {
 }
 
 fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) -> RenderResult {
-    let samples_per_pixel = if dev_mode { 4 } else { 16 };
+    let samples_per_pixel = if dev_mode { 1 } else { 16 };
     let sampler = StratifiedSampler::new(samples_per_pixel);
 
     let passes = num_cpus::get();
