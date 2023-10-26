@@ -3,12 +3,11 @@ use std::rc::Rc;
 use glam::{uvec2, vec3, Affine3A, Quat, Vec3};
 
 use crate::{
-    example_scenes::util::{hdr_light_dome, load_ply},
+    example_scenes::util::{build_matte_constant, hdr_light_dome, load_ply},
     flux::{
         shapes::{Floor, Sphere, Transform, TriangleMesh},
         textures::ConstantTexture,
-        DielectricMaterial, DiffuseLightMaterial, MatteMaterial, PerspectiveCamera, Primitive,
-        Scene,
+        DielectricMaterial, DiffuseLightMaterial, PerspectiveCamera, Primitive, Scene,
     },
 };
 
@@ -36,10 +35,7 @@ pub fn dragon() -> Scene {
 
 fn build_aggregate() -> Vec<Primitive> {
     let floor = {
-        let mat = {
-            let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
-            Rc::new(MatteMaterial::new(tex))
-        };
+        let mat = build_matte_constant(Vec3::splat(0.5));
         let shape = Box::new(Floor::new());
         Primitive::new(shape, mat)
     };
@@ -47,7 +43,6 @@ fn build_aggregate() -> Vec<Primitive> {
     let dragon = {
         let mat = {
             let tex = Rc::new(ConstantTexture::new(Vec3::splat(1.0)));
-            // Rc::new(MatteMaterial::new(tex))
             Rc::new(DielectricMaterial::new(tex, 1.5))
         };
 

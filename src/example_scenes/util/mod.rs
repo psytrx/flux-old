@@ -1,5 +1,6 @@
 mod cornell_box;
 mod material_demo;
+mod materials;
 mod obj;
 mod ply;
 
@@ -8,6 +9,7 @@ use std::{path::Path, rc::Rc};
 pub use cornell_box::*;
 use glam::Vec3;
 pub use material_demo::*;
+pub use materials::*;
 pub use obj::load_obj;
 pub use ply::load_ply;
 

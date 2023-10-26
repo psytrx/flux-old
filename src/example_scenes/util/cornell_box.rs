@@ -1,10 +1,8 @@
-use std::rc::Rc;
-
 use glam::{uvec2, vec3, Vec3};
 
-use crate::flux::{
-    shapes::Quad, textures::ConstantTexture, Camera, DiffuseLightMaterial, MatteMaterial,
-    PerspectiveCamera, Primitive,
+use crate::{
+    example_scenes::util::{build_diffuse_constant, build_matte_constant},
+    flux::{shapes::Quad, Camera, PerspectiveCamera, Primitive},
 };
 
 pub fn cornell_box_camera(box_size: f32) -> Box<dyn Camera> {
@@ -25,10 +23,7 @@ pub fn cornell_box_camera(box_size: f32) -> Box<dyn Camera> {
 }
 
 pub fn cornell_box_aggregate(box_size: f32) -> Vec<Primitive> {
-    let white_mat = {
-        let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.73)));
-        Rc::new(MatteMaterial::new(tex))
-    };
+    let white_mat = build_matte_constant(Vec3::splat(0.73));
 
     let ulf = vec3(-box_size, box_size, -box_size) / 2.0;
     let dlf = vec3(-box_size, -box_size, -box_size) / 2.0;
@@ -40,19 +35,13 @@ pub fn cornell_box_aggregate(box_size: f32) -> Vec<Primitive> {
     let urb = vec3(box_size, box_size, box_size) / 2.0;
 
     let left_wall = {
-        let green_mat = {
-            let tex = Rc::new(ConstantTexture::new(vec3(0.12, 0.45, 0.15)));
-            Rc::new(MatteMaterial::new(tex))
-        };
+        let green_mat = build_matte_constant(vec3(0.12, 0.45, 0.15));
         let shape = Box::new(Quad::new([ulf, ulb, dlb, dlf]));
         Primitive::new(shape, green_mat)
     };
 
     let right_wall = {
-        let red_mat = {
-            let tex = Rc::new(ConstantTexture::new(vec3(0.65, 0.05, 0.05)));
-            Rc::new(MatteMaterial::new(tex))
-        };
+        let red_mat = build_matte_constant(vec3(0.65, 0.05, 0.05));
         let shape = Box::new(Quad::new([urf, drf, drb, urb]));
         Primitive::new(shape, red_mat)
     };
@@ -73,10 +62,7 @@ pub fn cornell_box_aggregate(box_size: f32) -> Vec<Primitive> {
     };
 
     let light = {
-        let light_mat = {
-            let tex = Rc::new(ConstantTexture::new(25.0 * Vec3::ONE));
-            Rc::new(DiffuseLightMaterial::new(tex))
-        };
+        let light_mat = build_diffuse_constant(Vec3::splat(25.0));
 
         let size = 0.1 * box_size;
         let y = box_size / 2.0 - 32.0 * f32::EPSILON;

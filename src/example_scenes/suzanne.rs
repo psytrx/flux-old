@@ -8,11 +8,11 @@ use crate::{
     flux::{
         shapes::{Floor, Transform, TriangleMesh},
         textures::{CheckerTexture, ConstantTexture},
-        MatteMaterial, MetalMaterial, PerspectiveCamera, Primitive, Scene,
+        MetalMaterial, PerspectiveCamera, Primitive, Scene,
     },
 };
 
-use super::util::hdr_light_dome;
+use super::util::{build_matte_constant, hdr_light_dome};
 
 pub fn suzanne() -> Scene {
     let camera = {
@@ -51,10 +51,7 @@ fn build_aggregate() -> Result<Vec<Primitive>> {
     };
 
     let suzanne = {
-        let mat = {
-            let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
-            Rc::new(MatteMaterial::new(tex))
-        };
+        let mat = build_matte_constant(Vec3::splat(0.5));
 
         let (models, _materials) = load_obj("./assets/suzanne/suzanne.obj")?;
         let vertices = models[0].vertices.clone();

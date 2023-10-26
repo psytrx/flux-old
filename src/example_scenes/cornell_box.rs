@@ -5,10 +5,10 @@ use glam::{vec3, Affine3A, Quat, Vec3};
 use crate::flux::{
     shapes::{QuadBox, Sphere, Transform},
     textures::ConstantTexture,
-    DielectricMaterial, MatteMaterial, Primitive, Scene,
+    DielectricMaterial, Primitive, Scene,
 };
 
-use super::util::{cornell_box_aggregate, cornell_box_camera};
+use super::util::{build_matte_constant, cornell_box_aggregate, cornell_box_camera};
 
 pub fn cornell_box() -> Scene {
     let box_size = 100.0;
@@ -21,10 +21,7 @@ pub fn cornell_box() -> Scene {
 }
 
 fn build_aggregate(box_size: f32) -> Vec<Primitive> {
-    let white_mat = {
-        let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.73)));
-        Rc::new(MatteMaterial::new(tex))
-    };
+    let white_mat = build_matte_constant(Vec3::splat(0.73));
 
     let left_box = {
         let size = box_size / 3.0;

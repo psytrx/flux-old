@@ -3,11 +3,13 @@ use std::rc::Rc;
 use glam::{uvec2, vec2, vec3, Vec3};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 
-use crate::flux::{
-    shapes::{Floor, Sphere},
-    textures::ConstantTexture,
-    Bounds2, DielectricMaterial, Material, MatteMaterial, MetalMaterial, PerspectiveCamera,
-    Primitive, Scene,
+use crate::{
+    example_scenes::util::build_matte_constant,
+    flux::{
+        shapes::{Floor, Sphere},
+        textures::ConstantTexture,
+        Bounds2, DielectricMaterial, Material, MetalMaterial, PerspectiveCamera, Primitive, Scene,
+    },
 };
 
 use super::{default_sky_light, sample_disks};
@@ -37,19 +39,13 @@ pub fn many_spheres() -> Scene {
 fn build_aggregate() -> Vec<Primitive> {
     let mut aggregate = {
         let floor = {
-            let mat = {
-                let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
-                Rc::new(MatteMaterial::new(tex))
-            };
+            let mat = build_matte_constant(Vec3::splat(0.5));
             let shape = Box::new(Floor::new());
             Primitive::new(shape, mat)
         };
 
         let left_sphere = {
-            let mat = {
-                let tex = Rc::new(ConstantTexture::new(vec3(0.4, 0.2, 0.1)));
-                Rc::new(MatteMaterial::new(tex))
-            };
+            let mat = build_matte_constant(vec3(0.4, 0.2, 0.1));
             let shape = Box::new(Sphere::new(vec3(-4.0, 1.0, 0.0), 1.0));
             Primitive::new(shape, mat)
         };
@@ -94,8 +90,7 @@ fn build_aggregate() -> Vec<Primitive> {
             let material: Rc<dyn Material> = if choose_mat < 0.6 {
                 // diffuse
                 let albedo = rng.gen::<Vec3>() * rng.gen::<Vec3>();
-                let tex = Rc::new(ConstantTexture::new(albedo));
-                Rc::new(MatteMaterial::new(tex))
+                build_matte_constant(albedo)
             } else if choose_mat < 0.9 {
                 // metal
                 let albedo = vec3(

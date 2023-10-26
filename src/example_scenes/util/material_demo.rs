@@ -2,10 +2,13 @@ use std::rc::Rc;
 
 use glam::{vec3, Vec3};
 
-use crate::flux::{
-    shapes::{Floor, Sphere},
-    textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
-    DielectricMaterial, MatteMaterial, MetalMaterial, Primitive,
+use crate::{
+    example_scenes::util::build_matte_constant,
+    flux::{
+        shapes::{Floor, Sphere},
+        textures::{CheckerTexture, ConstantTexture, ImageTexture, NoiseTexture, UvTexture},
+        DielectricMaterial, MatteMaterial, MetalMaterial, Primitive,
+    },
 };
 
 pub fn material_demo_aggregate() -> Vec<Primitive> {
@@ -40,10 +43,7 @@ pub fn material_demo_aggregate() -> Vec<Primitive> {
     };
 
     let matte_sphere = {
-        let mat = {
-            let tex = Rc::new(ConstantTexture::new(vec3(0.2, 0.5, 0.1)));
-            Rc::new(MatteMaterial::new(tex))
-        };
+        let mat = build_matte_constant(vec3(0.2, 0.5, 0.1));
         let shape = Box::new(Sphere::new(vec3(0.0, 1.0, 0.0), 1.0));
         Primitive::new(shape, mat)
     };
