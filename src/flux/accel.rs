@@ -13,7 +13,7 @@ pub struct EmbreeAccel {
 
 impl EmbreeAccel {
     pub unsafe fn build(primitives: &[Primitive]) -> EmbreeAccel {
-        trace_time!("build");
+        trace_time!("building accel");
 
         let device = rtcNewDevice(b"verbose=0" as *const _ as _);
 

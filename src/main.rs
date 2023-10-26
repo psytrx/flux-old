@@ -6,6 +6,7 @@ mod flux;
 use anyhow::Result;
 use flux::{integrators::Integrator, RenderResult, Scene};
 use log::{debug, info};
+use measure_time::{debug_time, trace_time};
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
@@ -19,6 +20,8 @@ use crate::{
 fn main() -> Result<()> {
     env_logger::init();
 
+    let t0_main = std::time::Instant::now();
+
     let args = std::env::args().collect::<Vec<_>>();
     let debug_mode = args.contains(&String::from("--dev"));
 
@@ -27,8 +30,8 @@ fn main() -> Result<()> {
     let num_passes = sweeps * num_cpus;
 
     let scene = {
-        info!("Loading scene...");
-        load_example_scene(ExampleScene::DefocusBlur)
+        info!("loading scene...");
+        load_example_scene(ExampleScene::CornellBox)
     };
 
     let renderer = {
@@ -40,12 +43,12 @@ fn main() -> Result<()> {
         Renderer::new(integrator, sampler, num_passes)
     };
 
-    let t0 = std::time::Instant::now();
+    let t0_render = std::time::Instant::now();
     let result = {
         info!("rendering...");
         renderer.render_film(&scene)
     };
-    let elapsed = t0.elapsed();
+    let elapsed = t0_render.elapsed();
 
     info!("render finished in {:.3?}", elapsed);
 
@@ -63,7 +66,12 @@ fn main() -> Result<()> {
     std::fs::copy("./output/output.png", "./output/output-raw.png")?;
 
     let denoised = {
+        info!("denoising...");
+        debug_time!("denoising");
+
         let albedo = {
+            trace_time!("rendering albedo channel");
+
             let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()));
             result
                 .film
@@ -73,6 +81,8 @@ fn main() -> Result<()> {
         };
 
         let normal = {
+            trace_time!("rendering normal channel");
+
             let result = render_aux(&scene, Box::new(NormalIntegrator::new()));
             result
                 .film
@@ -91,6 +101,9 @@ fn main() -> Result<()> {
     };
 
     denoised.to_srgb_image().save("./output/output.png")?;
+
+    let elapsed = t0_main.elapsed();
+    info!("finished in {:.3?}", elapsed);
 
     Ok(())
 }
