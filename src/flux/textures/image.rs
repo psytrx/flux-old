@@ -22,8 +22,8 @@ impl Texture<Vec3> for ImageTexture {
             vec2(uv.x, 1.0 - uv.y).clamp(Vec2::ZERO, Vec2::ONE)
         };
 
-        let x = (uv.x * self.img.width() as f32) as u32;
-        let y = (uv.y * self.img.height() as f32) as u32;
+        let x = ((uv.x * self.img.width() as f32) as u32).min(self.img.width() - 1);
+        let y = ((uv.y * self.img.height() as f32) as u32).min(self.img.height() - 1);
 
         let p = self.img.get_pixel(x, y);
         match p {
