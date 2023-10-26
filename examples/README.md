@@ -5,6 +5,11 @@
 ![Cornell Box](./img/cornell_box.png)
 *256 SPP, 1.4b rays, 21s, 65m RPS*¹
 
+## Suzanne
+
+![Suzanne](./img/suzanne.png)
+*256 SPP, 550m rays, 12s, 45m RPS*¹
+
 ## Material Demo
 
 ![Material Demo](./img/material_demo.png)

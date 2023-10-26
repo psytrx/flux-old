@@ -27,7 +27,7 @@ fn main() -> Result<()> {
 
     let scene = {
         info!("loading scene...");
-        load_example_scene(ExampleScene::WavefrontObj)
+        load_example_scene(ExampleScene::Suzanne)
     };
 
     let renderer = {

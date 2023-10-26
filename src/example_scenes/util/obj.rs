@@ -2,7 +2,7 @@ use std::{fmt::Debug, path::Path};
 
 use anyhow::Result;
 use glam::{vec3, Vec3};
-use log::warn;
+use log::{trace, warn};
 use tobj::{LoadOptions, Material};
 
 pub struct ModelResult {
@@ -30,8 +30,9 @@ pub fn load_obj<P: AsRef<Path> + Debug>(filename: P) -> Result<(Vec<ModelResult>
 
     let models = models
         .iter()
-        .map(|model| {
-            let vertices = model
+        .enumerate()
+        .map(|(i, model)| {
+            let vertices: Vec<Vec3> = model
                 .mesh
                 .positions
                 .chunks(3)
@@ -46,6 +47,13 @@ pub fn load_obj<P: AsRef<Path> + Debug>(filename: P) -> Result<(Vec<ModelResult>
                 .iter()
                 .map(|index| *index as usize)
                 .collect();
+
+            trace!(
+                "Loaded model {} from {:?} ({} vertices)",
+                i + 1,
+                &filename,
+                vertices.len()
+            );
 
             ModelResult { vertices, indices }
         })

@@ -6,15 +6,15 @@ use glam::{uvec2, vec3, Affine3A, Vec3};
 use crate::{
     example_scenes::util::load_obj,
     flux::{
-        shapes::{Floor, Transform, TriangleMesh},
-        textures::{CheckerTexture, ConstantTexture},
-        MatteMaterial, MetalMaterial, PerspectiveCamera, Primitive, Scene,
+        shapes::{Floor, Sphere, Transform, TriangleMesh},
+        textures::{CheckerTexture, ConstantTexture, ImageTexture},
+        DiffuseLightMaterial, MatteMaterial, MetalMaterial, PerspectiveCamera, Primitive, Scene,
     },
 };
 
 use super::default_sky_light;
 
-pub fn wavefront_obj() -> Scene {
+pub fn suzanne() -> Scene {
     let camera = {
         let resolution = uvec2(1024, 1024);
         let look_from = vec3(-1.0, 2.0, 4.0);
@@ -66,5 +66,15 @@ fn build_aggregate() -> Result<Vec<Primitive>> {
         Primitive::new(shape, mat)
     };
 
-    Ok(vec![floor, suzanne])
+    let light_dome = {
+        let mat = {
+            let img = image::open("./assets/lightprobes/pisa.exr").unwrap();
+            let tex = Rc::new(ImageTexture::new(img));
+            Rc::new(DiffuseLightMaterial::new(tex))
+        };
+        let shape = Box::new(Sphere::new(Vec3::ZERO, 1_000.0));
+        Primitive::new(shape, mat)
+    };
+
+    Ok(vec![floor, suzanne, light_dome])
 }
