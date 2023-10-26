@@ -5,7 +5,7 @@ use glam::{uvec2, vec3, Affine3A, Quat, Vec3};
 use crate::{
     example_scenes::util::{build_matte_constant, hdr_light_dome, load_ply},
     flux::{
-        shapes::{Floor, Sphere, Transform, TriangleMesh},
+        shapes::{Floor, Sphere, SubdivisionMesh, Transform},
         textures::ConstantTexture,
         DielectricMaterial, DiffuseLightMaterial, PerspectiveCamera, Primitive, Scene,
     },
@@ -47,7 +47,8 @@ fn build_aggregate() -> Vec<Primitive> {
         };
 
         let result = load_ply("./assets/dragon/dragon_vrip.ply").unwrap();
-        let shape = Box::new(TriangleMesh::new(result.vertices, result.indices));
+        // let shape = Box::new(TriangleMesh::new(result.vertices, result.indices));
+        let shape = Box::new(SubdivisionMesh::new(4.0, result.vertices, result.indices));
         let transform = Affine3A::from_scale_rotation_translation(
             Vec3::splat(10.0),
             Quat::IDENTITY,
