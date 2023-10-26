@@ -19,7 +19,7 @@ pub fn load_obj<P: AsRef<Path> + Debug>(filename: P) -> Result<(Vec<ModelResult>
 
     let materials = maybe_materials.unwrap_or_else(|err| {
         warn!(
-            "Failed to load models from obj file {:?}: {}",
+            "Failed to load materials from obj file {:?}: {}",
             &filename, err
         );
         vec![]

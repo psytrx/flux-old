@@ -8,7 +8,7 @@
 ## Suzanne
 
 ![Suzanne](./img/suzanne.png)
-*256 SPP, 550m rays, 12s, 45m RPS*¹
+*256 SPP, 550m rays, 11s, 50m RPS*¹
 
 ## Dragon
 

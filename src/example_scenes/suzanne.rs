@@ -6,7 +6,7 @@ use glam::{uvec2, vec3, Affine3A, Vec3};
 use crate::{
     example_scenes::util::load_obj,
     flux::{
-        shapes::{Floor, Transform, TriangleMesh},
+        shapes::{Floor, SubdivisionMesh, Transform},
         textures::{CheckerTexture, ConstantTexture},
         MetalMaterial, PerspectiveCamera, Primitive, Scene,
     },
@@ -57,7 +57,7 @@ fn build_aggregate() -> Result<Vec<Primitive>> {
         let vertices = models[0].vertices.clone();
         let indices = models[0].indices.clone();
 
-        let shape = Box::new(TriangleMesh::new(vertices, indices));
+        let shape = Box::new(SubdivisionMesh::new(3.0, vertices, indices));
         let transform = Affine3A::from_translation(vec3(0.0, 0.95, 0.0));
         let shape = Box::new(Transform::new(transform, shape));
         Primitive::new(shape, mat)
