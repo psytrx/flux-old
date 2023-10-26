@@ -7,12 +7,10 @@ use crate::{
     example_scenes::util::load_obj,
     flux::{
         shapes::{Floor, Sphere, Transform, TriangleMesh},
-        textures::{CheckerTexture, ConstantTexture, ImageTexture},
+        textures::{CheckerTexture, ConstantTexture, ImageTexture, MultiplyTexture},
         DiffuseLightMaterial, MatteMaterial, MetalMaterial, PerspectiveCamera, Primitive, Scene,
     },
 };
-
-use super::default_sky_light;
 
 pub fn suzanne() -> Scene {
     let camera = {
@@ -31,7 +29,7 @@ pub fn suzanne() -> Scene {
 
     let aggregate =
         build_aggregate().unwrap_or_else(|err| panic!("Failed to build wavefront scene: {}", err));
-    let lights = vec![default_sky_light()];
+    let lights = vec![];
 
     Scene::new(camera, aggregate, lights)
 }
@@ -70,6 +68,7 @@ fn build_aggregate() -> Result<Vec<Primitive>> {
         let mat = {
             let img = image::open("./assets/lightprobes/pisa.exr").unwrap();
             let tex = Rc::new(ImageTexture::new(img));
+            let tex = Rc::new(MultiplyTexture::new(2.0, tex));
             Rc::new(DiffuseLightMaterial::new(tex))
         };
         let shape = Box::new(Sphere::new(Vec3::ZERO, 1_000.0));
