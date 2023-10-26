@@ -3,24 +3,25 @@ use std::rc::Rc;
 use glam::{uvec2, vec3, Vec3};
 
 use crate::flux::{
-    shapes::Quad, textures::ConstantTexture, Camera, DiffuseLightMaterial, MatteMaterial, Primitive,
+    shapes::Quad, textures::ConstantTexture, Camera, DiffuseLightMaterial, MatteMaterial,
+    PerspectiveCamera, Primitive,
 };
 
-pub fn cornell_box_camera(box_size: f32) -> Camera {
+pub fn cornell_box_camera(box_size: f32) -> Box<dyn Camera> {
     let resolution = uvec2(1024, 1024);
 
     let z_offset = 1.7 * box_size;
     let look_from = vec3(0.0, 0.0, -z_offset);
     let look_at = Vec3::ZERO;
 
-    Camera::new(
+    Box::new(PerspectiveCamera::new(
         resolution,
         look_from,
         look_at,
         45.0,
         0.3,
         look_at.distance(look_from),
-    )
+    ))
 }
 
 pub fn cornell_box_aggregate(box_size: f32) -> Vec<Primitive> {

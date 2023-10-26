@@ -11,7 +11,7 @@ use super::{
 pub struct Scene {
     pub primitives: Vec<Primitive>,
     pub accel: EmbreeAccel,
-    pub camera: Camera,
+    pub camera: Box<dyn Camera>,
     pub lights: Vec<Box<dyn Light>>,
 }
 
@@ -21,7 +21,11 @@ pub struct Scene {
 unsafe impl Sync for Scene {}
 
 impl Scene {
-    pub fn new(camera: Camera, primitives: Vec<Primitive>, lights: Vec<Box<dyn Light>>) -> Self {
+    pub fn new(
+        camera: Box<dyn Camera>,
+        primitives: Vec<Primitive>,
+        lights: Vec<Box<dyn Light>>,
+    ) -> Self {
         let accel = unsafe { EmbreeAccel::build(&primitives) };
         Self {
             primitives,

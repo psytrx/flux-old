@@ -6,7 +6,8 @@ use rand::{rngs::StdRng, Rng, SeedableRng};
 use crate::flux::{
     shapes::{Floor, Sphere},
     textures::ConstantTexture,
-    Bounds2, Camera, DielectricMaterial, Material, MatteMaterial, MetalMaterial, Primitive, Scene,
+    Bounds2, DielectricMaterial, Material, MatteMaterial, MetalMaterial, PerspectiveCamera,
+    Primitive, Scene,
 };
 
 use super::{default_sky_light, sample_disks};
@@ -17,14 +18,14 @@ pub fn many_spheres() -> Scene {
         let look_from = vec3(13.0, 4.0, -3.0);
         let look_at = vec3(2.5, 0.5, 0.0);
 
-        Camera::new(
+        Box::new(PerspectiveCamera::new(
             resolution,
             look_from,
             Vec3::ZERO,
             35.0,
             0.025,
             look_at.distance(look_from),
-        )
+        ))
     };
 
     let aggregate = build_aggregate();

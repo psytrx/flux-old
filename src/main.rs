@@ -95,7 +95,7 @@ fn main() -> Result<()> {
         };
 
         unsafe {
-            let denoiser = Denoiser::new(scene.camera.resolution, &albedo, &normal);
+            let denoiser = Denoiser::new(scene.camera.resolution(), &albedo, &normal);
             trace_time!("denoise filter");
             denoiser.denoise(&result.film)
         }

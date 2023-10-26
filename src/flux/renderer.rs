@@ -32,7 +32,9 @@ impl Renderer {
             .into_par_iter()
             .map(|pass| self.render_pass(scene, pass));
 
-        let merged_film = Arc::new(Mutex::new(Film::new(scene.camera.resolution)));
+        let resolution = scene.camera.resolution();
+
+        let merged_film = Arc::new(Mutex::new(Film::new(resolution)));
         let passes_merged = Arc::new(Mutex::new(0));
         let last_update = Arc::new(Mutex::new(std::time::Instant::now()));
         let rays = Arc::new(Mutex::new(0));
@@ -74,12 +76,14 @@ impl Renderer {
     }
 
     fn render_pass(&self, scene: &Scene, pass: usize) -> RenderResult {
-        let mut film = Film::new(scene.camera.resolution);
+        let resolution = scene.camera.resolution();
+
+        let mut film = Film::new(resolution);
         let mut rng = StdRng::seed_from_u64(pass.try_into().unwrap());
         let mut rays = 0;
 
-        for y in 0..scene.camera.resolution.y {
-            for x in 0..scene.camera.resolution.x {
+        for y in 0..resolution.y {
+            for x in 0..resolution.x {
                 let p_raster = vec2(x as f32, y as f32);
 
                 let camera_samples = self.sampler.camera_samples(p_raster, &mut rng);
