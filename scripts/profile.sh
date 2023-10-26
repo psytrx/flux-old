@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cargo build --profile profiling &&
-	samply record target/profiling/flux
+	RUST_LOG=debug samply record target/profiling/flux
