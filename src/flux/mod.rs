@@ -1,6 +1,6 @@
 mod accel;
 mod bounds;
-mod camera;
+mod cameras;
 mod denoise;
 mod film;
 pub mod integrators;
@@ -16,7 +16,7 @@ pub mod shapes;
 pub mod textures;
 
 pub use bounds::Bounds2;
-pub use camera::Camera;
+pub use cameras::Camera;
 pub use denoise::Denoiser;
 pub use film::Film;
 pub use materials::*;

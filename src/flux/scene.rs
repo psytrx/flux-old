@@ -4,7 +4,7 @@ use embree4_sys::{rtcIntersect1, RTCRay, RTCRayHit, RTC_INVALID_GEOMETRY_ID};
 use glam::vec3;
 
 use super::{
-    accel::EmbreeAccel, camera::Camera, interaction::Interaction, lights::Light,
+    accel::EmbreeAccel, cameras::Camera, interaction::Interaction, lights::Light,
     primitive::Primitive, ray::Ray,
 };
 
