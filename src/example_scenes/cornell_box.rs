@@ -2,7 +2,7 @@ use glam::{uvec2, vec3, Vec3};
 
 use crate::flux::{Camera, Scene};
 
-use super::empty_cornell_box_primitives;
+use super::util::empty_cornell_box_primitives;
 
 pub fn cornell_box() -> Scene {
     let box_size = 100.0;
