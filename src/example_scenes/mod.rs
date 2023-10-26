@@ -3,6 +3,7 @@ mod defocus_blur;
 mod many_spheres;
 mod material_demo;
 mod util;
+mod wavefront_obj;
 
 use glam::{vec2, vec3, Vec2, Vec3};
 use measure_time::debug_time;
@@ -19,6 +20,7 @@ use crate::{
 use defocus_blur::defocus_blur;
 use many_spheres::many_spheres;
 use material_demo::material_demo;
+use wavefront_obj::wavefront_obj;
 
 #[allow(dead_code)]
 pub enum ExampleScene {
@@ -26,6 +28,7 @@ pub enum ExampleScene {
     DefocusBlur,
     ManySpheres,
     CornellBox,
+    WavefrontObj,
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {
@@ -35,6 +38,7 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
         ExampleScene::DefocusBlur => defocus_blur(),
         ExampleScene::ManySpheres => many_spheres(),
         ExampleScene::CornellBox => cornell_box(),
+        ExampleScene::WavefrontObj => wavefront_obj(),
     }
 }
 
