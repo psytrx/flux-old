@@ -3,7 +3,7 @@
 ## Cornell Box
 
 ![Cornell Box](./img/cornell_box.png)
-*256 SPP, 1.4b rays, 21s, 65m RPS*¹
+*256 SPP, 1.4b rays, 25s, 55m RPS*¹
 
 ## Suzanne
 
