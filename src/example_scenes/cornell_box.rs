@@ -5,7 +5,7 @@ use glam::{vec3, Affine3A, Quat, Vec3};
 use crate::flux::{
     shapes::{QuadBox, Sphere, Transform},
     textures::ConstantTexture,
-    DielectricMaterial, Primitive, Scene,
+    DielectricMaterial, DiffuseLightMaterial, MetalMaterial, Primitive, Scene,
 };
 
 use super::util::{build_matte_constant, cornell_box_aggregate, cornell_box_camera};
@@ -62,7 +62,45 @@ fn build_aggregate(box_size: f32) -> Vec<Primitive> {
         Primitive::new(shape, glass_mat)
     };
 
+    let metal_spheres = {
+        (0..3).map(|i| {
+            let radius = box_size / 20.0;
+            let fuzz = 0.1 * (i + 1) as f32;
+            let mat = {
+                let tex = Rc::new(ConstantTexture::new(vec3(
+                    if i % 3 == 0 { 0.8 } else { 0.1 },
+                    if i % 3 == 1 { 0.8 } else { 0.1 },
+                    if i % 3 == 2 { 0.8 } else { 0.1 },
+                )));
+                Rc::new(MetalMaterial::new(tex, fuzz))
+            };
+            let shape = Box::new(Sphere::new(
+                vec3(
+                    -box_size / 2.5 + (i as f32) * 2.5 * radius,
+                    -box_size / 2.0 + radius,
+                    -box_size / 2.5 + (i as f32) * box_size / 15.0,
+                ),
+                radius,
+            ));
+            Primitive::new(shape, mat)
+        })
+    };
+
+    let glow_sphere = {
+        let glass_mat = {
+            let tex = Rc::new(ConstantTexture::new(vec3(2.0, 2.0, 0.0)));
+            Rc::new(DiffuseLightMaterial::new(tex))
+        };
+        let radius = box_size / 20.0;
+        let shape = Box::new(Sphere::new(
+            vec3(box_size / 2.7, -box_size / 2.0 + radius, -box_size / 2.7),
+            radius,
+        ));
+        Primitive::new(shape, glass_mat)
+    };
+
     let mut aggregate = cornell_box_aggregate(box_size);
-    aggregate.extend([left_box, right_box, glass_sphere]);
+    aggregate.extend([left_box, right_box, glass_sphere, glow_sphere]);
+    aggregate.extend(metal_spheres);
     aggregate
 }

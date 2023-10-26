@@ -62,7 +62,7 @@ pub fn cornell_box_aggregate(box_size: f32) -> Vec<Primitive> {
     };
 
     let light = {
-        let light_mat = build_diffuse_constant(Vec3::splat(25.0));
+        let light_mat = build_diffuse_constant(Vec3::splat(15.0));
 
         let size = 0.1 * box_size;
         let y = box_size / 2.0 - 32.0 * f32::EPSILON;
