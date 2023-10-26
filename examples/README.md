@@ -10,6 +10,11 @@
 ![Suzanne](./img/suzanne.png)
 *256 SPP, 550m rays, 12s, 45m RPS*¹
 
+## Dragon
+
+![Dragon](./img/dragon.png)
+*256 SPP, 730m rays, 13s, 50m RPS*¹
+
 ## Material Demo
 
 ![Material Demo](./img/material_demo.png)

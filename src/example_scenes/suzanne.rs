@@ -6,11 +6,13 @@ use glam::{uvec2, vec3, Affine3A, Vec3};
 use crate::{
     example_scenes::util::load_obj,
     flux::{
-        shapes::{Floor, Sphere, Transform, TriangleMesh},
-        textures::{CheckerTexture, ConstantTexture, ImageTexture, MultiplyTexture},
-        DiffuseLightMaterial, MatteMaterial, MetalMaterial, PerspectiveCamera, Primitive, Scene,
+        shapes::{Floor, Transform, TriangleMesh},
+        textures::{CheckerTexture, ConstantTexture},
+        MatteMaterial, MetalMaterial, PerspectiveCamera, Primitive, Scene,
     },
 };
+
+use super::util::hdr_light_dome;
 
 pub fn suzanne() -> Scene {
     let camera = {
@@ -54,26 +56,17 @@ fn build_aggregate() -> Result<Vec<Primitive>> {
             Rc::new(MatteMaterial::new(tex))
         };
 
-        let (models, _) = load_obj("./assets/suzanne/suzanne.obj")?;
+        let (models, _materials) = load_obj("./assets/suzanne/suzanne.obj")?;
         let vertices = models[0].vertices.clone();
         let indices = models[0].indices.clone();
+
         let shape = Box::new(TriangleMesh::new(vertices, indices));
         let transform = Affine3A::from_translation(vec3(0.0, 0.95, 0.0));
-        let shape = Transform::new(transform, shape);
-        let shape = Box::new(shape);
+        let shape = Box::new(Transform::new(transform, shape));
         Primitive::new(shape, mat)
     };
 
-    let light_dome = {
-        let mat = {
-            let img = image::open("./assets/lightprobes/pisa.exr").unwrap();
-            let tex = Rc::new(ImageTexture::new(img));
-            let tex = Rc::new(MultiplyTexture::new(2.0, tex));
-            Rc::new(DiffuseLightMaterial::new(tex))
-        };
-        let shape = Box::new(Sphere::new(Vec3::ZERO, 1_000.0));
-        Primitive::new(shape, mat)
-    };
+    let light_dome = hdr_light_dome("./assets/lightprobes/pisa.exr");
 
     Ok(vec![floor, suzanne, light_dome])
 }

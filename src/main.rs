@@ -27,7 +27,7 @@ fn main() -> Result<()> {
 
     let scene = {
         info!("loading scene...");
-        load_example_scene(ExampleScene::Suzanne)
+        load_example_scene(ExampleScene::Dragon)
     };
 
     let renderer = {

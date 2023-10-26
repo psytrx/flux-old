@@ -5,10 +5,7 @@ use glam::{vec3, Vec3};
 use log::{trace, warn};
 use tobj::{LoadOptions, Material};
 
-pub struct ModelResult {
-    pub vertices: Vec<Vec3>,
-    pub indices: Vec<usize>,
-}
+use super::ModelResult;
 
 pub fn load_obj<P: AsRef<Path> + Debug>(filename: P) -> Result<(Vec<ModelResult>, Vec<Material>)> {
     let (models, maybe_materials) = tobj::load_obj(

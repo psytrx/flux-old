@@ -1,5 +1,6 @@
 mod cornell_box;
 mod defocus_blur;
+mod dragon;
 mod many_spheres;
 mod material_demo;
 mod suzanne;
@@ -18,6 +19,7 @@ use crate::{
 };
 
 use defocus_blur::defocus_blur;
+use dragon::dragon;
 use many_spheres::many_spheres;
 use material_demo::material_demo;
 use suzanne::suzanne;
@@ -29,6 +31,7 @@ pub enum ExampleScene {
     ManySpheres,
     CornellBox,
     Suzanne,
+    Dragon,
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {
@@ -39,6 +42,7 @@ pub fn load_example_scene(scene: ExampleScene) -> Scene {
         ExampleScene::ManySpheres => many_spheres(),
         ExampleScene::CornellBox => cornell_box(),
         ExampleScene::Suzanne => suzanne(),
+        ExampleScene::Dragon => dragon(),
     }
 }
 
