@@ -9,7 +9,7 @@ use super::{
 };
 
 pub struct Scene {
-    primitives: Vec<Primitive>,
+    pub primitives: Vec<Primitive>,
     pub accel: EmbreeAccel,
     pub camera: Camera,
     pub lights: Vec<Box<dyn Light>>,

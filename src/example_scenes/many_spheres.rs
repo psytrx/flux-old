@@ -27,42 +27,48 @@ pub fn many_spheres() -> Scene {
         )
     };
 
-    let mut aggregate = {
-        let floor_mat = {
-            let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
-            Rc::new(MatteMaterial::new(tex))
-        };
-        let left_mat = {
-            let tex = Rc::new(ConstantTexture::new(vec3(0.4, 0.2, 0.1)));
-            Rc::new(MatteMaterial::new(tex))
-        };
-        let center_mat = {
-            let tex = Rc::new(ConstantTexture::new(Vec3::ONE));
-            Rc::new(DielectricMaterial::new(tex, 1.5))
-        };
-        let right_mat = {
-            let tex = Rc::new(ConstantTexture::new(vec3(0.7, 0.6, 0.5)));
-            Rc::new(MetalMaterial::new(tex, 0.025))
-        };
+    let aggregate = build_aggregate();
+    let lights = vec![default_sky_light()];
 
+    Scene::new(camera, aggregate, lights)
+}
+
+fn build_aggregate() -> Vec<Primitive> {
+    let mut aggregate = {
         let floor = {
+            let mat = {
+                let tex = Rc::new(ConstantTexture::new(Vec3::splat(0.5)));
+                Rc::new(MatteMaterial::new(tex))
+            };
             let shape = Box::new(Floor::new());
-            Primitive::new(shape, floor_mat.clone())
+            Primitive::new(shape, mat)
         };
 
         let left_sphere = {
+            let mat = {
+                let tex = Rc::new(ConstantTexture::new(vec3(0.4, 0.2, 0.1)));
+                Rc::new(MatteMaterial::new(tex))
+            };
             let shape = Box::new(Sphere::new(vec3(-4.0, 1.0, 0.0), 1.0));
-            Primitive::new(shape, left_mat.clone())
+            Primitive::new(shape, mat)
         };
 
         let center_sphere = {
+            let mat = {
+                let tex = Rc::new(ConstantTexture::new(Vec3::ONE));
+                Rc::new(DielectricMaterial::new(tex, 1.5))
+            };
             let shape = Box::new(Sphere::new(vec3(0.0, 1.0, 0.0), 1.0));
-            Primitive::new(shape, center_mat.clone())
+            Primitive::new(shape, mat)
         };
 
         let right_sphere = {
+            let mat = {
+                let tex = Rc::new(ConstantTexture::new(vec3(0.7, 0.6, 0.5)));
+                Rc::new(MetalMaterial::new(tex, 0.025))
+            };
             let shape = Box::new(Sphere::new(vec3(4.0, 1.0, 0.0), 1.0));
-            Primitive::new(shape, right_mat.clone())
+            Primitive::new(shape, mat)
         };
 
         vec![floor, left_sphere, center_sphere, right_sphere]
@@ -90,6 +96,7 @@ pub fn many_spheres() -> Scene {
                 let tex = Rc::new(ConstantTexture::new(albedo));
                 Rc::new(MatteMaterial::new(tex))
             } else if choose_mat < 0.9 {
+                // metal
                 let albedo = vec3(
                     rng.gen_range(0.5..1.0),
                     rng.gen_range(0.5..1.0),
@@ -99,6 +106,7 @@ pub fn many_spheres() -> Scene {
                 let fuzz = rng.gen_range(0.0..0.5);
                 Rc::new(MetalMaterial::new(tex, fuzz))
             } else {
+                // dielectric
                 let albedo = vec3(
                     rng.gen::<f32>().powf(1.0 / 4.0),
                     rng.gen::<f32>().powf(1.0 / 4.0),
@@ -113,7 +121,5 @@ pub fn many_spheres() -> Scene {
             aggregate.push(primitive);
         });
 
-    let lights = vec![default_sky_light()];
-
-    Scene::new(camera, aggregate, lights)
+    aggregate
 }

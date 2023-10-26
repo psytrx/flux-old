@@ -1,3 +1,5 @@
 mod cornell_box;
+mod material_demo;
 
-pub use cornell_box::empty_cornell_box_primitives;
+pub use cornell_box::*;
+pub use material_demo::*;
