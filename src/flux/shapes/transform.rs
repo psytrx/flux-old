@@ -5,7 +5,6 @@ use embree4_sys::{
 };
 use glam::{Affine3A, Vec2, Vec3};
 
-
 use crate::flux::interaction::Interaction;
 
 use super::Shape;
@@ -53,6 +52,7 @@ impl Shape for Transform {
 
     fn adjust_interaction(&self, int: &mut Interaction) {
         self.shape.adjust_interaction(int);
-        int.n = self.transform.transform_vector3(int.n);
+        // we need to normalize the normal, because the transform could have scaled it
+        int.n = self.transform.transform_vector3(int.n).normalize();
     }
 }
