@@ -33,6 +33,10 @@ pub trait Material {
     }
 
     fn bxdf_type(&self) -> BxdfType;
+
+    fn scattering_pdf(&self, _ray: &Ray, _int: &Interaction, _scattered: &Ray) -> f32 {
+        0.0
+    }
 }
 
 pub fn is_near_zero(v: Vec3) -> bool {

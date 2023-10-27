@@ -43,29 +43,35 @@ impl PathTracingIntegrator {
         };
 
         match scene.intersect(ray) {
+            None => {
+                let background = scene.lights.iter().map(|light| light.le(ray)).sum::<Vec3>();
+                LiResult {
+                    li: rr_factor * background,
+                    rays: 1,
+                }
+            }
             Some(int) => {
-                let le = int.primitive.material.emitted(&int);
+                let emitted = int.primitive.material.emitted(&int);
 
                 match int.primitive.material.scatter(ray, &int, rng) {
                     Some(srec) => {
-                        let result = self.li_internal(scene, &srec.scattered, rng, depth + 1);
+                        let scattering_pdf =
+                            int.primitive
+                                .material
+                                .scattering_pdf(ray, &int, &srec.scattered);
+                        let pdf = scattering_pdf;
+
+                        let li = self.li_internal(scene, &srec.scattered, rng, depth + 1);
+                        let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf;
                         LiResult {
-                            li: rr_factor * (le + srec.attenuation * result.li),
-                            rays: 1 + result.rays,
+                            li: rr_factor * (emitted + scattered),
+                            rays: 1 + li.rays,
                         }
                     }
                     None => LiResult {
-                        li: rr_factor * le,
+                        li: rr_factor * emitted,
                         rays: 1,
                     },
-                }
-            }
-            None => {
-                let background_radiance =
-                    scene.lights.iter().map(|light| light.le(ray)).sum::<Vec3>();
-                LiResult {
-                    li: rr_factor * background_radiance,
-                    rays: 1,
                 }
             }
         }

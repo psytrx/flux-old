@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{f32::consts::PI, rc::Rc};
 
 use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
@@ -37,5 +37,15 @@ impl Material for MatteMaterial {
 
     fn bxdf_type(&self) -> BxdfType {
         BxdfType::Diffuse
+    }
+
+    fn scattering_pdf(&self, _ray: &Ray, int: &Interaction, scattered: &Ray) -> f32 {
+        // INFO: We assume the ray direction is normalized
+        let cos_theta = int.n.dot(scattered.direction);
+        if cos_theta < 0.0 {
+            0.0
+        } else {
+            cos_theta / PI
+        }
     }
 }
