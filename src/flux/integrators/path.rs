@@ -61,47 +61,48 @@ impl PathTracingIntegrator {
                         rays: 1,
                     },
                     Some(srec) => {
-                        let lights = scene
-                            .primitives
-                            .iter()
-                            .filter(|prim| prim.material.bxdf_type() == BxdfType::DiffuseLight)
-                            .collect::<Vec<_>>();
-                        let _light = lights[rng.gen_range(0..lights.len())];
+                        // let lights = scene
+                        //     .primitives
+                        //     .iter()
+                        //     .filter(|prim| prim.material.bxdf_type() == BxdfType::DiffuseLight)
+                        //     .collect::<Vec<_>>();
+                        // let _light = lights[rng.gen_range(0..lights.len())];
+                        //
+                        // let sampled_light = lights[rng.gen_range(0..lights.len())];
+                        // let sampled_point = sampled_light.shape.sample_point(int.p, rng);
+                        // // trace!("Sampled point: {}", sampled_point);
+                        //
+                        // let direction = sampled_point - int.p;
+                        // let distance = direction.length();
+                        // let distance_squared = direction.length_squared();
+                        // let direction = direction.normalize();
+                        // let shadow_ray = spawn_ray(int.p, 8.0 * direction, ray.time);
+                        //
+                        // // TODO: magic number. Find a better way to handle t_max
+                        // let t_max = 0.99 * distance;
+                        // if scene.occluded(&shadow_ray, t_max) {
+                        //     return LiResult {
+                        //         li: rr_factor * emitted,
+                        //         rays: 1,
+                        //     };
+                        // }
+                        //
+                        // let cosine = (direction.dot(int.n) / direction.length()).abs();
+                        // let pdf_val = distance_squared / (cosine * sampled_light.shape.area());
+                        //
+                        // let scattering_pdf = 2.0
+                        //     * int
+                        //         .primitive
+                        //         .material
+                        //         .scattering_pdf(ray, &int, &shadow_ray);
+                        //
+                        // let li = self.li_internal(scene, &shadow_ray, rng, depth + 1);
+                        // let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf_val;
 
-                        let sampled_light = lights[rng.gen_range(0..lights.len())];
-                        let sampled_point = sampled_light.shape.sample_point(int.p, rng);
-                        // trace!("Sampled point: {}", sampled_point);
-
-                        let direction = sampled_point - int.p;
-                        let distance = direction.length();
-                        let distance_squared = direction.length_squared();
-                        let direction = direction.normalize();
-                        let shadow_ray = spawn_ray(int.p, 8.0 * direction, ray.time);
-
-                        // TODO: magic number. Find a better way to handle t_max
-                        let t_max = 0.99 * distance;
-                        if scene.occluded(&shadow_ray, t_max) {
-                            return LiResult {
-                                li: rr_factor * emitted,
-                                rays: 1,
-                            };
-                        }
-
-                        let cosine = (direction.dot(int.n) / direction.length()).abs();
-                        let pdf_val = distance_squared / (cosine * sampled_light.shape.area());
-
-                        let scattering_pdf = 2.0
-                            * int
-                                .primitive
-                                .material
-                                .scattering_pdf(ray, &int, &shadow_ray);
-
-                        let li = self.li_internal(scene, &shadow_ray, rng, depth + 1);
-                        let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf_val;
-
+                        let scattered = self.li_internal(scene, &srec.scattered, rng, depth + 1);
                         LiResult {
-                            li: rr_factor * (emitted + scattered),
-                            rays: 1 + li.rays,
+                            li: rr_factor * (emitted + srec.attenuation * scattered.li),
+                            rays: 1 + scattered.rays,
                         }
                     }
                 }
