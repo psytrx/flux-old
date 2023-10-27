@@ -65,7 +65,7 @@ pub fn empty_cornell_box_prims(box_size: f32) -> Vec<Primitive> {
         let light_mat = build_diffuse_constant(Vec3::splat(15.0));
 
         let size = 0.1 * box_size;
-        let y = box_size / 2.0 - 32.0 * f32::EPSILON;
+        let y = box_size / 2.0 - 0.001;
 
         let lf = vec3(-size, y, -size);
         let rf = vec3(size, y, -size);

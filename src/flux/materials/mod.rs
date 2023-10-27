@@ -43,7 +43,7 @@ pub trait Material {
 
 #[allow(dead_code)]
 pub fn is_near_zero(v: Vec3) -> bool {
-    v.x.abs() <= f32::EPSILON && v.y.abs() <= f32::EPSILON && v.z.abs() <= f32::EPSILON
+    v.x.abs() <= 0.001 && v.y.abs() <= 0.001 && v.z.abs() <= 0.001
 }
 
 pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {

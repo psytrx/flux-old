@@ -27,7 +27,7 @@ impl From<&Ray> for RTCRay {
             org_x: ray.origin.x,
             org_y: ray.origin.y,
             org_z: ray.origin.z,
-            tnear: f32::EPSILON,
+            tnear: 0.001,
             dir_x: ray.direction.x,
             dir_y: ray.direction.y,
             dir_z: ray.direction.z,
