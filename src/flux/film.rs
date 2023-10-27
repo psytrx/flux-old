@@ -1,7 +1,7 @@
 use glam::{vec3, UVec2, Vec2, Vec3};
 use image::{Rgb, RgbImage};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Film {
     pub resolution: UVec2,
     pixels: Vec<Pixel>,

@@ -21,7 +21,7 @@ pub use denoise::Denoiser;
 pub use film::Film;
 pub use materials::*;
 pub use primitive::Primitive;
-pub use renderer::{RenderResult, Renderer};
+pub use renderer::{RenderResult, RenderUpdateEvent, Renderer};
 pub use sampler::StratifiedSampler;
 pub use scene::Scene;
 

@@ -4,7 +4,6 @@ use std::{
 };
 
 use glam::{vec2, UVec2};
-use log::debug;
 use rand::{rngs::StdRng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
@@ -14,6 +13,7 @@ pub struct Renderer {
     integrator: Box<dyn Integrator>,
     sampler: StratifiedSampler,
     num_passes: usize,
+    update_handler: Option<fn(RenderUpdateEvent)>,
 }
 
 impl Renderer {
@@ -21,11 +21,13 @@ impl Renderer {
         integrator: Box<dyn Integrator>,
         sampler: StratifiedSampler,
         num_passes: usize,
+        update_handler: Option<fn(RenderUpdateEvent)>,
     ) -> Self {
         Self {
             integrator,
             sampler,
             num_passes,
+            update_handler,
         }
     }
 
@@ -56,18 +58,17 @@ impl Renderer {
                 && shared.passes_merged < self.num_passes
                 && shared.last_update.elapsed() > Duration::from_secs(1);
             if should_update {
-                shared
-                    .merged_film
-                    .to_srgb_image()
-                    .save("./output/output.png")
-                    .unwrap();
-                shared.last_update = Instant::now();
+                if let Some(handler) = self.update_handler {
+                    let progress = 100.0 * (shared.passes_merged as f32 / self.num_passes as f32);
+                    let event = RenderUpdateEvent {
+                        passes: shared.passes_merged,
+                        progress,
+                        film: shared.merged_film.clone(),
+                    };
+                    handler(event)
+                }
 
-                let progress = 100.0 * (shared.passes_merged as f32 / self.num_passes as f32);
-                debug!(
-                    "{} / {} ({:>6.3}%)",
-                    shared.passes_merged, self.num_passes, progress
-                );
+                shared.last_update = Instant::now();
             }
         });
 
@@ -110,6 +111,12 @@ struct SharedState {
     passes_merged: usize,
     last_update: Instant,
     total_rays: usize,
+}
+
+pub struct RenderUpdateEvent {
+    pub passes: usize,
+    pub progress: f32,
+    pub film: Film,
 }
 
 pub struct RenderResult {

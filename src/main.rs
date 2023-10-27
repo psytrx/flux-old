@@ -40,7 +40,18 @@ fn main() -> Result<()> {
         let num_cpus = num_cpus::get();
         let num_passes = sweeps * num_cpus;
 
-        Renderer::new(integrator, sampler, num_passes)
+        Renderer::new(
+            integrator,
+            sampler,
+            num_passes,
+            Some(|evt| {
+                debug!("pass {}\t({:>6.3}%)", evt.passes, evt.progress);
+                evt.film
+                    .to_srgb_image()
+                    .save("./output/output.png")
+                    .unwrap();
+            }),
+        )
     };
 
     let t0_render = std::time::Instant::now();
@@ -114,7 +125,7 @@ fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) ->
     let sampler = StratifiedSampler::new(samples_per_pixel);
 
     let passes = num_cpus::get();
-    let renderer = Renderer::new(integrator, sampler, passes);
+    let renderer = Renderer::new(integrator, sampler, passes, None);
 
     renderer.render_film(scene)
 }
