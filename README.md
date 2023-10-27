@@ -58,8 +58,6 @@ chmod u+x ./scripts/*
 ./scripts/run-dev.sh --scene suzanne
 ```
 
-````
-
 ### Logging
 
 Flux uses [env_logger](https://docs.rs/env_logger/) for logging.
@@ -68,7 +66,7 @@ To enable logging, set the corresponding environment variables to control verbos
 ```bash
 RUST_LOG=debug flux [OPTIONS]
 # available options: trace, debug, info, warn, error
-````
+```
 
 ## Example Scenes
 
