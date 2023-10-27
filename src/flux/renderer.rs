@@ -1,19 +1,19 @@
-use std::{
-    sync::{Arc, Mutex},
-    time::{Duration, Instant},
-};
+use std::sync::{Arc, Mutex};
 
 use glam::{vec2, UVec2};
 use rand::{rngs::StdRng, SeedableRng};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use super::{film::Film, integrators::Integrator, sampler::StratifiedSampler, Scene};
+use super::{
+    film::Film, integrators::Integrator, sampler::StratifiedSampler, updater::RenderUpdateEvent,
+    RenderUpdater, Scene,
+};
 
 pub struct Renderer {
     integrator: Box<dyn Integrator>,
     sampler: StratifiedSampler,
     num_passes: usize,
-    update_handler: Option<fn(RenderUpdateEvent)>,
+    updater: Option<Box<dyn RenderUpdater>>,
 }
 
 impl Renderer {
@@ -21,13 +21,13 @@ impl Renderer {
         integrator: Box<dyn Integrator>,
         sampler: StratifiedSampler,
         num_passes: usize,
-        update_handler: Option<fn(RenderUpdateEvent)>,
+        updater: Option<Box<dyn RenderUpdater>>,
     ) -> Self {
         Self {
             integrator,
             sampler,
             num_passes,
-            update_handler,
+            updater,
         }
     }
 
@@ -39,12 +39,9 @@ impl Renderer {
 
         let resolution = scene.camera.resolution();
 
-        let num_cpus = num_cpus::get();
-        let update_interval = Duration::from_secs(1);
         let shared = Arc::new(Mutex::new(SharedState {
             merged_film: Film::new(resolution),
             passes_merged: 0,
-            last_update: Instant::now() - update_interval,
             total_rays: 0,
         }));
 
@@ -54,21 +51,18 @@ impl Renderer {
             shared.passes_merged += 1;
             shared.total_rays += result.rays;
 
-            let should_update = shared.passes_merged % num_cpus == 0
-                && shared.passes_merged < self.num_passes
-                && shared.last_update.elapsed() > Duration::from_secs(1);
-            if should_update {
-                if let Some(handler) = self.update_handler {
-                    let progress = 100.0 * (shared.passes_merged as f32 / self.num_passes as f32);
+            if let Some(updater) = &self.updater {
+                if updater.should_update(shared.passes_merged, self.num_passes) {
+                    let progress_percent =
+                        100.0 * (shared.passes_merged as f32 / self.num_passes as f32);
                     let event = RenderUpdateEvent {
-                        passes: shared.passes_merged,
-                        progress,
+                        current_pass: shared.passes_merged,
+                        total_passes: self.num_passes,
+                        progress_percent,
                         film: shared.merged_film.clone(),
                     };
-                    handler(event)
+                    updater.update(event);
                 }
-
-                shared.last_update = Instant::now();
             }
         });
 
@@ -109,14 +103,7 @@ impl Renderer {
 struct SharedState {
     merged_film: Film,
     passes_merged: usize,
-    last_update: Instant,
     total_rays: usize,
-}
-
-pub struct RenderUpdateEvent {
-    pub passes: usize,
-    pub progress: f32,
-    pub film: Film,
 }
 
 pub struct RenderResult {

@@ -20,6 +20,7 @@ use crate::{
 
 use anyhow::Result;
 use clap::Parser;
+use flux::DefaultRenderUpdater;
 use log::{debug, info};
 use measure_time::{debug_time, trace_time};
 use num_format::{Locale, ToFormattedString};
@@ -119,19 +120,15 @@ fn setup_renderer(args: &Args) -> Renderer {
         args.sweeps * num_cpus
     };
 
-    Renderer::new(
-        integrator,
-        sampler,
-        num_passes,
-        Some(|evt| {
-            debug!("pass {}\t({:>6.3}%)", evt.passes, evt.progress);
+    let updater = {
+        let filepath = Path::new(&args.out_dir).join("output.png");
+        Box::new(DefaultRenderUpdater::new(
+            Duration::from_secs(args.update_interval),
+            filepath,
+        ))
+    };
 
-            // TODO: get out_dir from the program args into this closure
-            let beauty_path = Path::new("./output").join("output.png");
-
-            evt.film.to_srgb_image().save(&beauty_path).unwrap();
-        }),
-    )
+    Renderer::new(integrator, sampler, num_passes, Some(updater))
 }
 
 fn load_scene(args: &Args) -> Result<Scene> {
@@ -146,7 +143,6 @@ fn load_scene(args: &Args) -> Result<Scene> {
 fn render_aux_channel(scene: &Scene, integrator: Box<dyn Integrator>, args: &Args) -> RenderResult {
     let sampler = StratifiedSampler::new(args.aux_spp);
 
-    // Currently, we only do a single sweep
     let passes = args.aux_sweeps * num_cpus::get();
     let renderer = Renderer::new(integrator, sampler, passes, None);
 
@@ -205,5 +201,5 @@ pub struct Args {
 
     /// Update interval for intermediate render results
     #[arg(long = "update-interval", short = 'u', default_value = "1")]
-    update_interval: u32,
+    update_interval: u64,
 }

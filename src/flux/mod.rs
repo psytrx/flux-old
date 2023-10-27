@@ -14,6 +14,7 @@ mod sampler;
 mod scene;
 pub mod shapes;
 pub mod textures;
+mod updater;
 
 pub use bounds::Bounds2;
 pub use cameras::*;
@@ -21,9 +22,10 @@ pub use denoise::Denoiser;
 pub use film::Film;
 pub use materials::*;
 pub use primitive::Primitive;
-pub use renderer::{RenderResult, RenderUpdateEvent, Renderer};
+pub use renderer::{RenderResult, Renderer};
 pub use sampler::StratifiedSampler;
 pub use scene::Scene;
+pub use updater::{DefaultRenderUpdater, RenderUpdater};
 
 use std::f32::consts::PI;
 
