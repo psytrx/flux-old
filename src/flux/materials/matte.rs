@@ -25,7 +25,6 @@ impl Material for MatteMaterial {
 
         let uvw = Onb::from_w(int.n);
         let direction = uvw.local(uniform_sample_hemisphere(rng.gen()));
-
         let scattered = int.spawn_ray(direction);
 
         let pdf = uvw.w.dot(direction) / PI;

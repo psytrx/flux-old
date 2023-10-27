@@ -1,8 +1,12 @@
-use glam::{vec3, Vec3};
+use glam::{Vec3};
 
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{ray::Ray, Scene};
+use crate::flux::{
+    pdf::{CosinePdf, Pdf},
+    ray::Ray,
+    Scene,
+};
 
 use super::{Integrator, LiResult};
 
@@ -60,38 +64,15 @@ impl PathTracingIntegrator {
                         rays: 1,
                     },
                     Some(srec) => {
-                        let on_light = vec3(
-                            rng.gen_range(-10.0..10.0),
-                            50.0 - 32.0 * f32::EPSILON,
-                            rng.gen_range(-10.0..10.0),
-                        );
-                        let to_light = on_light - int.p;
-                        let distance_squared = to_light.length();
-                        let to_light = to_light.normalize();
+                        let surface_pdf = CosinePdf::new(int.n);
+                        let scattered = int.spawn_ray(surface_pdf.generate(rng));
+                        let pdf_val = surface_pdf.value(scattered.direction);
 
-                        if to_light.dot(int.n) < 0.0 {
-                            return LiResult {
-                                li: rr_factor * emitted,
-                                rays: 1,
-                            };
-                        }
-
-                        let light_area = 400.0;
-                        let light_cosine = to_light.y.abs();
-                        if light_cosine < 32.0 * f32::EPSILON {
-                            return LiResult {
-                                li: rr_factor * emitted,
-                                rays: 1,
-                            };
-                        }
-
-                        let pdf = distance_squared / (light_cosine * light_area);
-                        let scattered = Ray::new(int.p, to_light, ray.time);
                         let scattering_pdf =
                             int.primitive.material.scattering_pdf(ray, &int, &scattered);
 
                         let li = self.li_internal(scene, &srec.scattered, rng, depth + 1);
-                        let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf;
+                        let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf_val;
 
                         LiResult {
                             li: rr_factor * (emitted + scattered),

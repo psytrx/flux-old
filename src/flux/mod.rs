@@ -8,6 +8,7 @@ mod interaction;
 pub mod lights;
 mod materials;
 mod onb;
+mod pdf;
 mod primitive;
 mod ray;
 mod renderer;
@@ -84,7 +85,6 @@ pub fn random_in_hemisphere(n: Vec3, rng: &mut StdRng) -> Vec3 {
     }
 }
 
-#[allow(dead_code)]
 fn random_unit_vector(rng: &mut StdRng) -> Vec3 {
     random_in_unit_sphere(rng).normalize()
 }
