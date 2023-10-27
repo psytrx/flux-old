@@ -29,12 +29,12 @@ use suzanne::suzanne;
 #[derive(Debug, EnumString)]
 #[strum(ascii_case_insensitive)]
 pub enum ExampleScene {
-    MaterialDemo,
-    DefocusBlur,
-    ManySpheres,
     CornellBox,
-    Suzanne,
+    DefocusBlur,
     Dragon,
+    ManySpheres,
+    MaterialDemo,
+    Suzanne,
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {

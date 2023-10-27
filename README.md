@@ -25,12 +25,12 @@ cargo build --profile release
 
 Available scenes:
 
-- MaterialDemo
-- DefocusBlur
-- ManySpheres
 - CornellBox
-- Suzanne
+- DefocusBlur
 - Dragon
+- ManySpheres
+- MaterialDemo
+- Suzanne
 
 ```bash
 flux --scene cornellbox
