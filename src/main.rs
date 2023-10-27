@@ -60,20 +60,20 @@ fn main() -> Result<()> {
         info!("denoising...");
         debug_time!("denoising");
 
+        let albedo_path = output_dir.join("output-albedo.png");
         let albedo = {
             trace_time!("rendering albedo channel");
 
             let result = render_aux_channel(&scene, Box::new(AlbedoIntegrator::new()), &args);
-            let albedo_path = output_dir.join("output-albedo.png");
             result.film.to_srgb_image().save(&albedo_path)?;
             result.film
         };
 
+        let normal_path = output_dir.join("output-normal.png");
         let normal = {
             trace_time!("rendering normal channel");
 
             let result = render_aux_channel(&scene, Box::new(NormalIntegrator::new()), &args);
-            let normal_path = output_dir.join("output-normal.png");
             result.film.to_srgb_image().save(&normal_path)?;
 
             // OIDN expects normals to be in range [-1, 1], but the integrator generates colors in
@@ -82,7 +82,27 @@ fn main() -> Result<()> {
         };
 
         unsafe {
-            let denoiser = Denoiser::new(scene.camera.resolution(), &albedo, &normal);
+            let denoiser = {
+                trace_time!("initializing denoiser");
+                Denoiser::new(scene.camera.resolution(), &albedo, &normal)
+            };
+
+            let albedo_raw_path = output_dir.join("output-albedo-raw.png");
+            std::fs::copy(&albedo_path, albedo_raw_path)?;
+            denoiser
+                .albedo_denoised
+                .to_srgb_image()
+                .save(&albedo_path)?;
+
+            // again, we need to map the normals back to our domain of [0, 1]
+            let normal_raw_path = output_dir.join("output-normal-raw.png");
+            std::fs::copy(&normal_path, normal_raw_path)?;
+            denoiser
+                .normal_denoised
+                .mapped(|s| (s + 1.0) / 2.0)
+                .to_srgb_image()
+                .save(&normal_path)?;
+
             trace_time!("denoise filter");
             denoiser.denoise(&result.film)
         }
