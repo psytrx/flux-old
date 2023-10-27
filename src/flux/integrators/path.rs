@@ -63,6 +63,7 @@ impl PathTracingIntegrator {
 
                         let li = self.li_internal(scene, &srec.scattered, rng, depth + 1);
                         let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf;
+
                         LiResult {
                             li: rr_factor * (emitted + scattered),
                             rays: 1 + li.rays,

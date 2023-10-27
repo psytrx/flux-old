@@ -16,6 +16,7 @@ use super::{interaction::Interaction, ray::Ray};
 pub struct ScatterRec {
     pub attenuation: Vec3,
     pub scattered: Ray,
+    pub pdf: f32,
 }
 
 #[derive(PartialEq)]
@@ -39,6 +40,7 @@ pub trait Material {
     }
 }
 
+#[allow(dead_code)]
 pub fn is_near_zero(v: Vec3) -> bool {
     v.x.abs() <= f32::EPSILON && v.y.abs() <= f32::EPSILON && v.z.abs() <= f32::EPSILON
 }

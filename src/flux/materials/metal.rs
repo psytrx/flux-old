@@ -32,6 +32,7 @@ impl Material for MetalMaterial {
             Some(ScatterRec {
                 attenuation,
                 scattered,
+                pdf: 1.0,
             })
         } else {
             None

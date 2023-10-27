@@ -3,9 +3,11 @@ use std::{f32::consts::PI, rc::Rc};
 use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture, uniform_sample_sphere};
+use crate::flux::{
+    interaction::Interaction, onb::Onb, ray::Ray, textures::Texture, uniform_sample_hemisphere,
+};
 
-use super::{is_near_zero, BxdfType, Material, ScatterRec};
+use super::{BxdfType, Material, ScatterRec};
 
 pub struct MatteMaterial {
     kd: Rc<dyn Texture<Vec3>>,
@@ -21,17 +23,17 @@ impl Material for MatteMaterial {
     fn scatter(&self, _ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
         let attenuation = self.kd.evaluate(int);
 
-        let direction = int.n + uniform_sample_sphere(rng.gen());
-        let direction = if is_near_zero(direction) {
-            int.n
-        } else {
-            direction
-        };
+        let uvw = Onb::from_w(int.n);
+        let direction = uvw.local(uniform_sample_hemisphere(rng.gen()));
+
         let scattered = int.spawn_ray(direction);
+
+        let pdf = uvw.w.dot(direction) / PI;
 
         Some(ScatterRec {
             attenuation,
             scattered,
+            pdf,
         })
     }
 
@@ -39,13 +41,8 @@ impl Material for MatteMaterial {
         BxdfType::Diffuse
     }
 
-    fn scattering_pdf(&self, _ray: &Ray, int: &Interaction, scattered: &Ray) -> f32 {
+    fn scattering_pdf(&self, _ray: &Ray, _int: &Interaction, _scattered: &Ray) -> f32 {
         // INFO: We assume the ray direction is normalized
-        let cos_theta = int.n.dot(scattered.direction);
-        if cos_theta < 0.0 {
-            0.0
-        } else {
-            cos_theta / PI
-        }
+        1.0 / (2.0 * PI)
     }
 }
