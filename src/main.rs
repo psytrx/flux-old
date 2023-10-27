@@ -3,27 +3,25 @@
 mod example_scenes;
 mod flux;
 
+use crate::{
+    example_scenes::{load_example_scene, ExampleScene},
+    flux::{
+        integrators::Integrator,
+        integrators::{AlbedoIntegrator, NormalIntegrator, PathTracingIntegrator},
+        Denoiser, RenderResult, Renderer, Scene, StratifiedSampler,
+    },
+};
+
 use anyhow::Result;
-use flux::{integrators::Integrator, RenderResult, Scene};
 use log::{debug, info};
 use measure_time::{debug_time, trace_time};
 use num_format::{Locale, ToFormattedString};
 
-use crate::{
-    example_scenes::{load_example_scene, ExampleScene},
-    flux::{
-        integrators::{AlbedoIntegrator, NormalIntegrator, PathTracingIntegrator},
-        Denoiser, Renderer, StratifiedSampler,
-    },
-};
-
 fn main() -> Result<()> {
     env_logger::init();
+    trace_time!("main");
 
-    let t0_main = std::time::Instant::now();
-
-    let args = std::env::args().collect::<Vec<_>>();
-    let dev_mode = args.contains(&String::from("--dev"));
+    let args = parse_args();
 
     let scene = {
         info!("loading scene...");
@@ -33,10 +31,10 @@ fn main() -> Result<()> {
     let renderer = {
         let integrator = Box::new(PathTracingIntegrator::new(8, 32, 0.1));
 
-        let samples_per_pixel = if dev_mode { 1 } else { 4 };
+        let samples_per_pixel = if args.dev { 1 } else { 4 };
         let sampler = StratifiedSampler::new(samples_per_pixel);
 
-        let sweeps = if dev_mode { 1 } else { 4 };
+        let sweeps = if args.dev { 1 } else { 4 };
         let num_cpus = num_cpus::get();
         let num_passes = sweeps * num_cpus;
 
@@ -83,7 +81,7 @@ fn main() -> Result<()> {
         let albedo = {
             trace_time!("rendering albedo channel");
 
-            let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()), dev_mode);
+            let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()), args.dev);
             result
                 .film
                 .to_srgb_image()
@@ -94,7 +92,7 @@ fn main() -> Result<()> {
         let normal = {
             trace_time!("rendering normal channel");
 
-            let result = render_aux(&scene, Box::new(NormalIntegrator::new()), dev_mode);
+            let result = render_aux(&scene, Box::new(NormalIntegrator::new()), args.dev);
             result
                 .film
                 .to_srgb_image()
@@ -114,9 +112,6 @@ fn main() -> Result<()> {
 
     denoised.to_srgb_image().save("./output/output.png")?;
 
-    let elapsed = t0_main.elapsed();
-    info!("finished in {:.3?}", elapsed);
-
     Ok(())
 }
 
@@ -128,4 +123,16 @@ fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) ->
     let renderer = Renderer::new(integrator, sampler, passes, None);
 
     renderer.render_film(scene)
+}
+
+fn parse_args() -> Args {
+    let args: Vec<_> = std::env::args().collect();
+
+    Args {
+        dev: args.contains(&String::from("--dev")),
+    }
+}
+
+struct Args {
+    dev: bool,
 }
