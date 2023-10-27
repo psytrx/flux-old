@@ -1,4 +1,5 @@
-use glam::Vec3;
+use glam::{vec3, Vec3};
+use log::trace;
 use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{ray::Ray, Scene};
@@ -54,12 +55,40 @@ impl PathTracingIntegrator {
                 let emitted = int.primitive.material.emitted(&int);
 
                 match int.primitive.material.scatter(ray, &int, rng) {
+                    None => LiResult {
+                        li: rr_factor * emitted,
+                        rays: 1,
+                    },
                     Some(srec) => {
+                        let on_light = vec3(
+                            rng.gen_range(-10.0..10.0),
+                            50.0 - 32.0 * f32::EPSILON,
+                            rng.gen_range(-10.0..10.0),
+                        );
+                        let to_light = on_light - int.p;
+                        let distance_squared = to_light.length_squared();
+                        let to_light = to_light.normalize();
+
+                        if to_light.dot(int.n) < 0.0 {
+                            return LiResult {
+                                li: rr_factor * emitted,
+                                rays: 1,
+                            };
+                        }
+
+                        let light_area = 400.0;
+                        let light_cosine = to_light.y.abs();
+                        if light_cosine < 32.0 * f32::EPSILON {
+                            return LiResult {
+                                li: rr_factor * emitted,
+                                rays: 1,
+                            };
+                        }
+
+                        let pdf = distance_squared / (light_cosine * light_area);
+                        let scattered = Ray::new(int.p, to_light, ray.time);
                         let scattering_pdf =
-                            int.primitive
-                                .material
-                                .scattering_pdf(ray, &int, &srec.scattered);
-                        let pdf = scattering_pdf;
+                            int.primitive.material.scattering_pdf(ray, &int, &scattered);
 
                         let li = self.li_internal(scene, &srec.scattered, rng, depth + 1);
                         let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf;
@@ -69,10 +98,6 @@ impl PathTracingIntegrator {
                             rays: 1 + li.rays,
                         }
                     }
-                    None => LiResult {
-                        li: rr_factor * emitted,
-                        rays: 1,
-                    },
                 }
             }
         }
