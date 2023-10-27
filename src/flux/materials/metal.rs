@@ -3,7 +3,12 @@ use std::rc::Rc;
 use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture, uniform_sample_sphere};
+use crate::flux::{
+    interaction::{spawn_ray, Interaction},
+    ray::Ray,
+    textures::Texture,
+    uniform_sample_sphere,
+};
 
 use super::{reflect, BxdfType, Material, ScatterRec};
 
@@ -28,7 +33,7 @@ impl Material for MetalMaterial {
         // Rays scattering to below the originating surface will be cancelled
         let above_surface = direction.dot(int.n) > 0.0;
         if above_surface {
-            let scattered = int.spawn_ray(direction);
+            let scattered = spawn_ray(int.p, direction, ray.time);
             Some(ScatterRec {
                 attenuation,
                 scattered,

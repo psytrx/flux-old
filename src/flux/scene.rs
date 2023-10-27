@@ -1,6 +1,6 @@
 use std::ptr::null_mut;
 
-use embree4_sys::{rtcIntersect1, RTCRay, RTCRayHit, RTC_INVALID_GEOMETRY_ID};
+use embree4_sys::{rtcIntersect1, rtcOccluded1, RTCRay, RTCRayHit, RTC_INVALID_GEOMETRY_ID};
 use glam::vec3;
 
 use super::{
@@ -65,5 +65,14 @@ impl Scene {
 
             Some(int)
         }
+    }
+
+    pub fn occluded(&self, ray: &Ray, t_max: f32) -> bool {
+        let mut ray = RTCRay {
+            tfar: t_max,
+            ..RTCRay::from(ray)
+        };
+        unsafe { rtcOccluded1(self.accel.scene, &mut ray, null_mut()) };
+        ray.tfar < 0.0
     }
 }

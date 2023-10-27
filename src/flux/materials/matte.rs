@@ -4,7 +4,11 @@ use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{
-    interaction::Interaction, onb::Onb, ray::Ray, textures::Texture, uniform_sample_hemisphere,
+    interaction::{spawn_ray, Interaction},
+    onb::Onb,
+    ray::Ray,
+    textures::Texture,
+    uniform_sample_hemisphere,
 };
 
 use super::{BxdfType, Material, ScatterRec};
@@ -20,12 +24,12 @@ impl MatteMaterial {
 }
 
 impl Material for MatteMaterial {
-    fn scatter(&self, _ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
+    fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec> {
         let attenuation = self.kd.evaluate(int);
 
         let uvw = Onb::from_w(int.n);
         let direction = uvw.local(uniform_sample_hemisphere(rng.gen()));
-        let scattered = int.spawn_ray(direction);
+        let scattered = spawn_ray(int.p, direction, ray.time);
 
         let pdf = uvw.w.dot(direction) / PI;
 

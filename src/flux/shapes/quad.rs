@@ -3,16 +3,31 @@ use embree4_sys::{
     RTCGeometryType,
 };
 use glam::{vec2, Vec2, Vec3};
+use rand::{rngs::StdRng, Rng};
 
 use super::Shape;
 
 pub struct Quad {
     vertices: [Vec3; 4],
+    p: Vec3,
+    u: Vec3,
+    v: Vec3,
+    area: f32,
 }
 
 impl Quad {
     pub fn new(vertices: [Vec3; 4]) -> Self {
-        Self { vertices }
+        let p = vertices[0];
+        let u = vertices[1] - vertices[0];
+        let v = vertices[3] - vertices[0];
+        let area = u.cross(v).length();
+        Self {
+            vertices,
+            p,
+            u,
+            v,
+            area,
+        }
     }
 }
 
@@ -58,5 +73,15 @@ impl Shape for Quad {
         let v = pc.dot(v_vec) / v_vec.length_squared();
 
         vec2(u, v)
+    }
+
+    fn sample_point(&self, _origin: Vec3, rng: &mut StdRng) -> Vec3 {
+        let s: f32 = rng.gen();
+        let t = rng.gen::<f32>();
+        self.p + s * self.u + t * self.v
+    }
+
+    fn area(&self) -> f32 {
+        self.area
     }
 }

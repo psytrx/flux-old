@@ -9,6 +9,7 @@ mod trimesh;
 pub use floor::*;
 pub use quad::*;
 pub use quadbox::*;
+use rand::rngs::StdRng;
 pub use sphere::*;
 pub use subdivision::*;
 pub use transform::*;
@@ -25,4 +26,12 @@ pub trait Shape {
     fn uv(&self, p: Vec3) -> Vec2;
 
     fn adjust_interaction(&self, _int: &mut Interaction) {}
+
+    fn sample_point(&self, _origin: Vec3, _rng: &mut StdRng) -> Vec3 {
+        todo!()
+    }
+
+    fn area(&self) -> f32 {
+        todo!()
+    }
 }

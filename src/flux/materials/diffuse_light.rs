@@ -32,6 +32,6 @@ impl Material for DiffuseLightMaterial {
     }
 
     fn bxdf_type(&self) -> BxdfType {
-        BxdfType::Other
+        BxdfType::DiffuseLight
     }
 }

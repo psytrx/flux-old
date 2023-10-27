@@ -22,6 +22,7 @@ pub struct ScatterRec {
 #[derive(PartialEq)]
 pub enum BxdfType {
     Diffuse,
+    DiffuseLight,
     Specular,
     Other,
 }

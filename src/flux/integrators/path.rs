@@ -1,12 +1,8 @@
-use glam::{Vec3};
+use glam::Vec3;
 
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{
-    pdf::{CosinePdf, Pdf},
-    ray::Ray,
-    Scene,
-};
+use crate::flux::{interaction::spawn_ray, ray::Ray, BxdfType, Scene};
 
 use super::{Integrator, LiResult};
 
@@ -64,14 +60,47 @@ impl PathTracingIntegrator {
                         rays: 1,
                     },
                     Some(srec) => {
-                        let surface_pdf = CosinePdf::new(int.n);
-                        let scattered = int.spawn_ray(surface_pdf.generate(rng));
-                        let pdf_val = surface_pdf.value(scattered.direction);
+                        let lights = scene
+                            .primitives
+                            .iter()
+                            .filter(|prim| prim.material.bxdf_type() == BxdfType::DiffuseLight)
+                            .collect::<Vec<_>>();
+                        let _light = lights[rng.gen_range(0..lights.len())];
+
+                        let sampled_light = lights[rng.gen_range(0..lights.len())];
+                        let sampled_point = sampled_light.shape.sample_point(int.p, rng);
+                        // trace!("Sampled point: {}", sampled_point);
+
+                        let direction = sampled_point - int.p;
+                        let distance = direction.length();
+
+                        let shadow_ray = spawn_ray(int.p, direction, ray.time);
+                        // trace!(
+                        //     "Shadow ray: {:?} -> {:?}",
+                        //     shadow_ray.origin,
+                        //     shadow_ray.direction
+                        // );
+
+                        // TODO: magic number. Find a better way to handle t_max
+                        let t_max = 0.999 * distance;
+                        let occluded = scene.occluded(&shadow_ray, t_max);
+                        if occluded {
+                            return LiResult {
+                                li: rr_factor * (emitted * srec.attenuation),
+                                rays: 1,
+                            };
+                        }
+
+                        let distance_squared = distance * direction.length_squared();
+                        let cosine = (direction.dot(int.n) / direction.length()).abs();
+                        let pdf_val = distance_squared / (cosine * sampled_light.shape.area());
 
                         let scattering_pdf =
-                            int.primitive.material.scattering_pdf(ray, &int, &scattered);
+                            int.primitive
+                                .material
+                                .scattering_pdf(ray, &int, &shadow_ray);
 
-                        let li = self.li_internal(scene, &srec.scattered, rng, depth + 1);
+                        let li = self.li_internal(scene, &shadow_ray, rng, depth + 1);
                         let scattered = (srec.attenuation * scattering_pdf * li.li) / pdf_val;
 
                         LiResult {

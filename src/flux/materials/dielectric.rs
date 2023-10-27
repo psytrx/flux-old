@@ -3,7 +3,11 @@ use std::rc::Rc;
 use glam::Vec3;
 use rand::{rngs::StdRng, Rng};
 
-use crate::flux::{interaction::Interaction, ray::Ray, textures::Texture};
+use crate::flux::{
+    interaction::{spawn_ray, Interaction},
+    ray::Ray,
+    textures::Texture,
+};
 
 use super::{reflect, refract, BxdfType, Material, ScatterRec};
 
@@ -46,13 +50,13 @@ impl Material for DielectricMaterial {
 
         let scattered = if reflecting {
             let direction = reflect(unit_direction, int.n);
-            int.spawn_ray(direction)
+            spawn_ray(int.p, direction, ray.time)
         } else {
             let direction = refract(unit_direction, int.n, refraction_ratio);
             // If we refract the ray, we need to flip the normal direction so we offset the spawned
             // ray in the correct direction.
             int.n = -int.n;
-            int.spawn_ray(direction)
+            spawn_ray(int.p, direction, ray.time)
         };
 
         Some(ScatterRec {

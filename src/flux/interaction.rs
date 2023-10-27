@@ -10,14 +10,12 @@ pub struct Interaction<'a> {
     pub primitive: &'a Primitive,
 }
 
-impl<'a> Interaction<'a> {
-    pub fn spawn_ray(&self, direction: Vec3) -> Ray {
-        let origin = offset_ray_origin(self.p, 8.0 * self.n);
-        Ray::new(origin, direction, self.time)
-    }
+pub fn spawn_ray(p: Vec3, direction: Vec3, time: f32) -> Ray {
+    let origin = offset_ray_origin(p, direction);
+    Ray::new(origin, direction, time)
 }
 
-fn offset_ray_origin(p: Vec3, d: Vec3) -> Vec3 {
+pub fn offset_ray_origin(p: Vec3, d: Vec3) -> Vec3 {
     const ORIGIN: f32 = 1.0 / 32.0;
     const FLOAT_SCALE: f32 = 1.0 / 65536.0;
     const INT_SCALE: f32 = 256.0;
