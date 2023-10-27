@@ -2,7 +2,7 @@
 
 ## Cornell Box
 
-![Cornell Box](./img/cornell_box.png)
+![Cornell Box](./img/cornellbox.png)
 *256 SPP, 1.4b rays, 25s, 55m RPS*¹
 
 ## Suzanne
@@ -17,17 +17,17 @@
 
 ## Material Demo
 
-![Material Demo](./img/material_demo.png)
+![Material Demo](./img/materialdemo.png)
 *256 SPP, 700m rays, 8s, 80m RPS*¹
 
 ## Many Spheres
 
-![Many Spheres](./img/many_spheres.png)
+![Many Spheres](./img/manyspheres.png)
 *256 SPP, 260m rays, 4s, 70m RPS*¹
 
 ## Defocus Blur
 
-![Defocus Blur](./img/defocus_blur.png)
+![Defocus Blur](./img/defocusblur.png)
 *256 SPP, 340m rays, 5s, 75m RPS*¹
 
 ---
