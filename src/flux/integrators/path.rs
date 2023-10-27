@@ -66,7 +66,7 @@ impl PathTracingIntegrator {
                             rng.gen_range(-10.0..10.0),
                         );
                         let to_light = on_light - int.p;
-                        let distance_squared = to_light.length_squared();
+                        let distance_squared = to_light.length();
                         let to_light = to_light.normalize();
 
                         if to_light.dot(int.n) < 0.0 {

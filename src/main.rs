@@ -58,16 +58,18 @@ fn main() -> Result<()> {
     let beauty_raw_path = output_dir.join("output-raw.png");
     std::fs::copy(&beauty_path, beauty_raw_path)?;
 
-    let denoised = {
-        info!("denoising...");
+    if !args.no_denoise {
+        let denoised = {
+            info!("denoising...");
 
-        let denoiser = setup_denoiser(&scene, &args)?;
+            let denoiser = setup_denoiser(&scene, &args)?;
 
-        trace_time!("denoise filter");
-        unsafe { denoiser.denoise(&result.film) }
-    };
+            trace_time!("denoise filter");
+            unsafe { denoiser.denoise(&result.film) }
+        };
 
-    denoised.to_srgb_image().save(&beauty_path)?;
+        denoised.to_srgb_image().save(&beauty_path)?;
+    }
 
     info!("done");
     Ok(())
@@ -234,4 +236,8 @@ pub struct Args {
     /// Update interval for intermediate render results
     #[arg(long = "update-interval", short = 'u', default_value = "1")]
     update_interval: u64,
+
+    /// Disables denoising
+    #[arg(long = "no-denoise")]
+    no_denoise: bool,
 }
