@@ -38,6 +38,28 @@ Options:
           Print version
 ```
 
+### Utility Scripts
+
+```bash
+# set execute permissions
+chmod u+x ./scripts/*
+
+# build & profile the profiling build (requires samply & valgrind to be installed)
+./scripts/profile-samply.sh
+./scripts/profile-cachegrind.sh
+
+# build & run release build
+./scripts/run.sh
+# you can also pass arguments to the run script
+./scripts/run.sh --scene dragon --spp 16 --sweeps 8
+
+# build & run debug/development build
+# presets with low-quality, but fast renderings
+./scripts/run-dev.sh --scene suzanne
+```
+
+````
+
 ### Logging
 
 Flux uses [env_logger](https://docs.rs/env_logger/) for logging.
@@ -46,7 +68,7 @@ To enable logging, set the corresponding environment variables to control verbos
 ```bash
 RUST_LOG=debug flux [OPTIONS]
 # available options: trace, debug, info, warn, error
-```
+````
 
 ## Example Scenes
 

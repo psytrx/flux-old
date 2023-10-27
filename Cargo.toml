@@ -25,10 +25,6 @@ strum = { version = "0.25.0", features = ["derive"] }
 thiserror = "1.0.50"
 tobj = "4.0.0"
 
-[profile.performance]
-inherits = "release"
-codegen-units = 1
-
 [profile.profiling]
 inherits = "release"
 debug = true
