@@ -32,4 +32,4 @@
 
 ---
 
-¹ Timing & performance stats are measured on an AMD Ryzen 7 7800X3D with 8 cores.
+¹ Timing & performance stats are measured on an 8-core AMD Ryzen 7 7800X3D
