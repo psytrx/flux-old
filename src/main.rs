@@ -147,8 +147,7 @@ fn render_aux_channel(scene: &Scene, integrator: Box<dyn Integrator>, args: &Arg
     let sampler = StratifiedSampler::new(args.aux_spp);
 
     // Currently, we only do a single sweep
-    let sweeps = 1;
-    let passes = sweeps * num_cpus::get();
+    let passes = args.aux_sweeps * num_cpus::get();
     let renderer = Renderer::new(integrator, sampler, passes, None);
 
     renderer.render_film(scene)
@@ -191,6 +190,10 @@ pub struct Args {
     /// Russian roulette path termination probability
     #[arg(long = "rr-stop-prob", default_value = "0.1")]
     rr_stop_prob: f32,
+
+    ///Number of full CPU sweeps for auxiliary channels
+    #[arg(long = "aux-sweeps", default_value = "1")]
+    aux_sweeps: usize,
 
     /// Samples/pixel/pass for auxiliary channels
     #[arg(long = "aux-spp", default_value = "4")]
