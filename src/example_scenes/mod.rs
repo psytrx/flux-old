@@ -9,6 +9,7 @@ mod util;
 use glam::{vec2, vec3, Vec2, Vec3};
 use measure_time::debug_time;
 use rand::{rngs::StdRng, Rng};
+use strum::EnumString;
 
 use crate::{
     example_scenes::cornell_box::cornell_box,
@@ -25,6 +26,8 @@ use material_demo::material_demo;
 use suzanne::suzanne;
 
 #[allow(dead_code)]
+#[derive(Debug, EnumString)]
+#[strum(ascii_case_insensitive)]
 pub enum ExampleScene {
     MaterialDemo,
     DefocusBlur,

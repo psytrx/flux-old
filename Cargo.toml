@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
+clap = { version = "4.4.7", features = ["derive"] }
 embree4-sys = "0.0.10"
 env_logger = "0.10.0"
 glam = { version = "0.24.2", features = ["rand"] }
@@ -20,6 +21,8 @@ oidn2-sys = "0.0.1"
 ply-rs = "0.1.3"
 rand = "0.8.5"
 rayon = "1.8.0"
+strum = { version = "0.25.0", features = ["derive"] }
+thiserror = "1.0.50"
 tobj = "4.0.0"
 
 [profile.performance]

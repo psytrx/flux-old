@@ -1,10 +1,12 @@
 #![feature(float_next_up_down)]
 
+mod args;
 mod example_scenes;
 mod flux;
 
 use crate::{
-    example_scenes::{load_example_scene, ExampleScene},
+    args::parse_args,
+    example_scenes::load_example_scene,
     flux::{
         integrators::Integrator,
         integrators::{AlbedoIntegrator, NormalIntegrator, PathTracingIntegrator},
@@ -21,11 +23,11 @@ fn main() -> Result<()> {
     env_logger::init();
     trace_time!("main");
 
-    let args = parse_args();
+    let args = parse_args()?;
 
     let scene = {
         info!("loading scene...");
-        load_example_scene(ExampleScene::CornellBox)
+        load_example_scene(args.scene)
     };
 
     let renderer = {
@@ -123,16 +125,4 @@ fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) ->
     let renderer = Renderer::new(integrator, sampler, passes, None);
 
     renderer.render_film(scene)
-}
-
-fn parse_args() -> Args {
-    let args: Vec<_> = std::env::args().collect();
-
-    Args {
-        dev: args.contains(&String::from("--dev")),
-    }
-}
-
-struct Args {
-    dev: bool,
 }
