@@ -4,7 +4,10 @@ use embree4_sys::{
     rtcNewGeometry, rtcSetNewGeometryBuffer, RTCBufferType, RTCDevice, RTCFormat, RTCGeometry,
     RTCGeometryType,
 };
-use glam::{vec2, Vec2, Vec3};
+use glam::{vec2, vec3, Vec2, Vec3};
+use rand::{rngs::StdRng, Rng};
+
+use crate::flux::uniform_sample_sphere;
 
 use super::Shape;
 
@@ -46,4 +49,31 @@ impl Shape for Sphere {
 
         vec2(phi / (2.0 * PI), theta / PI)
     }
+
+    fn area(&self) -> f32 {
+        todo!()
+    }
+
+    fn sample_point(&self, _origin: Vec3, rng: &mut StdRng) -> Vec3 {
+        self.center + self.radius * uniform_sample_sphere(rng.gen())
+    }
+
+    fn pdf_value(&self, _origin: Vec3, _direction: Vec3) -> f32 {
+        let cos_theta_max =
+            (1.0 - self.radius * self.radius / (self.center - _origin).length_squared()).sqrt();
+        let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
+        1.0 / solid_angle
+    }
+}
+
+fn random_to_sphere(radius: f32, distance_squared: f32, rng: &mut StdRng) -> Vec3 {
+    let r1: f32 = rng.gen();
+    let r2: f32 = rng.gen();
+    let z = 1.0 + r2 * ((1.0 - radius * radius / distance_squared).sqrt() - 1.0);
+
+    let phi = 2.0 * PI * r1;
+    let x = phi.cos() * (1.0 - z * z).sqrt();
+    let y = phi.sin() * (1.0 - z * z).sqrt();
+
+    vec3(x, y, z)
 }

@@ -34,4 +34,8 @@ pub trait Shape {
     fn area(&self) -> f32 {
         todo!()
     }
+
+    fn pdf_value(&self, _origin: Vec3, _direction: Vec3) -> f32 {
+        todo!()
+    }
 }
