@@ -35,18 +35,20 @@ fn main() -> Result<()> {
     let scene = load_scene(&args)?;
     let renderer = setup_renderer(&args);
 
-    let t_render_film = Instant::now();
     let result = {
         info!("rendering...");
-        renderer.render_film(&scene)
-    };
-    let elapsed = t_render_film.elapsed();
-    info!("render finished in {:.3?}", elapsed);
 
-    print_stats(RenderStats {
-        total_rays: result.rays,
-        elapsed,
-    });
+        let t_render_film = Instant::now();
+        let result = renderer.render_film(&scene);
+        let elapsed = t_render_film.elapsed();
+
+        print_stats(RenderStats {
+            total_rays: result.rays,
+            elapsed,
+        });
+
+        result
+    };
 
     let output_dir = Path::new(&args.out_dir);
 
@@ -58,62 +60,22 @@ fn main() -> Result<()> {
 
     let denoised = {
         info!("denoising...");
-        debug_time!("denoising");
 
-        let albedo_path = output_dir.join("output-albedo.png");
-        let albedo = {
-            trace_time!("rendering albedo channel");
+        let denoiser = setup_denoiser(&scene, &args)?;
 
-            let result = render_aux_channel(&scene, Box::new(AlbedoIntegrator::new()), &args);
-            result.film.to_srgb_image().save(&albedo_path)?;
-            result.film
-        };
-
-        let normal_path = output_dir.join("output-normal.png");
-        let normal = {
-            trace_time!("rendering normal channel");
-
-            let result = render_aux_channel(&scene, Box::new(NormalIntegrator::new()), &args);
-            result.film.to_srgb_image().save(&normal_path)?;
-
-            // OIDN expects normals to be in range [-1, 1], but the integrator generates colors in
-            // range [0, 1], so we scale the normals here.
-            result.film.mapped(|s| s * 2.0 - 1.0)
-        };
-
-        unsafe {
-            let denoiser = {
-                trace_time!("initializing denoiser");
-                Denoiser::new(scene.camera.resolution(), &albedo, &normal)
-            };
-
-            let albedo_raw_path = output_dir.join("output-albedo-raw.png");
-            std::fs::copy(&albedo_path, albedo_raw_path)?;
-            denoiser
-                .albedo_denoised
-                .to_srgb_image()
-                .save(&albedo_path)?;
-
-            // again, we need to map the normals back to our domain of [0, 1]
-            let normal_raw_path = output_dir.join("output-normal-raw.png");
-            std::fs::copy(&normal_path, normal_raw_path)?;
-            denoiser
-                .normal_denoised
-                .mapped(|s| (s + 1.0) / 2.0)
-                .to_srgb_image()
-                .save(&normal_path)?;
-
-            trace_time!("denoise filter");
-            denoiser.denoise(&result.film)
-        }
+        trace_time!("denoise filter");
+        unsafe { denoiser.denoise(&result.film) }
     };
 
     denoised.to_srgb_image().save(&beauty_path)?;
 
+    info!("done");
     Ok(())
 }
 
 fn print_stats(stats: RenderStats) {
+    info!("render finished in {:.3?}", stats.elapsed);
+
     debug!(
         "rays:     {:>16}",
         stats.total_rays.to_formatted_string(&Locale::en)
@@ -151,6 +113,56 @@ fn setup_renderer(args: &Args) -> Renderer {
     Renderer::new(integrator, sampler, num_passes, Some(updater))
 }
 
+fn setup_denoiser(scene: &Scene, args: &Args) -> Result<Denoiser> {
+    debug!("initializing denoiser");
+
+    let output_dir = Path::new(&args.out_dir);
+
+    let albedo_path = output_dir.join("output-albedo.png");
+    let albedo = {
+        trace_time!("rendering albedo channel");
+
+        let result = render_aux_channel(scene, Box::new(AlbedoIntegrator::new()), args);
+        result.film.to_srgb_image().save(&albedo_path)?;
+        result.film
+    };
+
+    let normal_path = output_dir.join("output-normal.png");
+    let normal = {
+        trace_time!("rendering normal channel");
+
+        let result = render_aux_channel(scene, Box::new(NormalIntegrator::new()), args);
+        result.film.to_srgb_image().save(&normal_path)?;
+
+        // OIDN expects normals to be in range [-1, 1], but the integrator generates colors in
+        // range [0, 1], so we scale the normals here.
+        result.film.mapped(|s| s * 2.0 - 1.0)
+    };
+
+    let denoiser = unsafe {
+        trace_time!("initializing denoiser");
+        Denoiser::new(scene.camera.resolution(), &albedo, &normal)
+    };
+
+    let albedo_raw_path = output_dir.join("output-albedo-raw.png");
+    std::fs::copy(&albedo_path, albedo_raw_path)?;
+    denoiser
+        .albedo_denoised
+        .to_srgb_image()
+        .save(&albedo_path)?;
+
+    // again, we need to map the normals back to our domain of [0, 1]
+    let normal_raw_path = output_dir.join("output-normal-raw.png");
+    std::fs::copy(&normal_path, normal_raw_path)?;
+    denoiser
+        .normal_denoised
+        .mapped(|s| (s + 1.0) / 2.0)
+        .to_srgb_image()
+        .save(&normal_path)?;
+
+    Ok(denoiser)
+}
+
 fn load_scene(args: &Args) -> Result<Scene> {
     info!("loading scene...");
     debug_time!("loading scene");
@@ -180,7 +192,7 @@ struct RenderStats {
     elapsed: Duration,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Clone, Debug, Parser)]
 #[command(version)]
 pub struct Args {
     /// The example scene to render
@@ -188,7 +200,7 @@ pub struct Args {
     scene: String,
 
     ///Number of full CPU sweeps to run
-    #[arg(long = "sweeps", default_value = "16")]
+    #[arg(long = "sweeps", default_value = "8")]
     sweeps: usize,
 
     /// Samples/pixel/pass
