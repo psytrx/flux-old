@@ -8,19 +8,34 @@ use crate::flux::{
     DielectricMaterial, DiffuseLightMaterial, MetalMaterial, Primitive, Scene,
 };
 
-use super::util::{build_matte_constant, cornell_box_aggregate, cornell_box_camera, load_ply};
+use super::util::{build_matte_constant, cornell_box_camera, empty_cornell_box_prims, load_ply};
 
 pub fn cornell_box() -> Scene {
     let box_size = 100.0;
     let camera = cornell_box_camera(box_size);
 
-    let aggregate = build_aggregate(box_size);
+    let mut aggregate = empty_cornell_box_prims(box_size);
+    aggregate.append(&mut build_box_prims(box_size));
+    aggregate.append(&mut build_extra_prims(box_size));
+
     let lights = vec![];
 
     Scene::new(camera, aggregate, lights)
 }
 
-fn build_aggregate(box_size: f32) -> Vec<Primitive> {
+pub fn simple_cornell_box() -> Scene {
+    let box_size = 100.0;
+    let camera = cornell_box_camera(box_size);
+
+    let mut aggregate = empty_cornell_box_prims(box_size);
+    aggregate.append(&mut build_box_prims(box_size));
+
+    let lights = vec![];
+
+    Scene::new(camera, aggregate, lights)
+}
+
+fn build_box_prims(box_size: f32) -> Vec<Primitive> {
     let white_mat = build_matte_constant(Vec3::splat(0.73));
 
     let left_box = {
@@ -45,6 +60,10 @@ fn build_aggregate(box_size: f32) -> Vec<Primitive> {
         Primitive::new(shape, white_mat.clone())
     };
 
+    vec![left_box, right_box]
+}
+
+fn build_extra_prims(box_size: f32) -> Vec<Primitive> {
     let glass_sphere = {
         let glass_mat = {
             let tex = Rc::new(ConstantTexture::new(vec3(0.8, 0.8, 1.0)));
@@ -116,8 +135,8 @@ fn build_aggregate(box_size: f32) -> Vec<Primitive> {
         Primitive::new(shape, mat)
     };
 
-    let mut aggregate = cornell_box_aggregate(box_size);
-    aggregate.extend([left_box, right_box, glass_sphere, glow_sphere, ruby_dragon]);
+    let mut aggregate = empty_cornell_box_prims(box_size);
+    aggregate.extend([glass_sphere, glow_sphere, ruby_dragon]);
     aggregate.extend(metal_spheres);
     aggregate
 }

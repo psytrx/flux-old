@@ -22,7 +22,7 @@ pub fn cornell_box_camera(box_size: f32) -> Box<dyn Camera> {
     ))
 }
 
-pub fn cornell_box_aggregate(box_size: f32) -> Vec<Primitive> {
+pub fn empty_cornell_box_prims(box_size: f32) -> Vec<Primitive> {
     let white_mat = build_matte_constant(Vec3::splat(0.73));
 
     let ulf = vec3(-box_size, box_size, -box_size) / 2.0;

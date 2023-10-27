@@ -80,6 +80,7 @@ Until then, you can load one of the example scenes:
 - Dragon
 - ManySpheres
 - MaterialDemo
+- SimpleCornellBox
 - Suzanne
 
 ```bash

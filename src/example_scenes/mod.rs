@@ -24,6 +24,8 @@ use many_spheres::many_spheres;
 use material_demo::material_demo;
 use suzanne::suzanne;
 
+use self::cornell_box::simple_cornell_box;
+
 #[allow(dead_code)]
 #[derive(Debug, EnumString)]
 #[strum(ascii_case_insensitive)]
@@ -33,17 +35,19 @@ pub enum ExampleScene {
     Dragon,
     ManySpheres,
     MaterialDemo,
+    SimpleCornellBox,
     Suzanne,
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {
     match scene {
-        ExampleScene::MaterialDemo => material_demo(),
-        ExampleScene::DefocusBlur => defocus_blur(),
-        ExampleScene::ManySpheres => many_spheres(),
         ExampleScene::CornellBox => cornell_box(),
-        ExampleScene::Suzanne => suzanne(),
+        ExampleScene::DefocusBlur => defocus_blur(),
         ExampleScene::Dragon => dragon(),
+        ExampleScene::ManySpheres => many_spheres(),
+        ExampleScene::MaterialDemo => material_demo(),
+        ExampleScene::SimpleCornellBox => simple_cornell_box(),
+        ExampleScene::Suzanne => suzanne(),
     }
 }
 
