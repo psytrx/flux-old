@@ -7,7 +7,6 @@ mod suzanne;
 mod util;
 
 use glam::{vec2, vec3, Vec2, Vec3};
-use measure_time::debug_time;
 use rand::{rngs::StdRng, Rng};
 use strum::EnumString;
 
@@ -38,7 +37,6 @@ pub enum ExampleScene {
 }
 
 pub fn load_example_scene(scene: ExampleScene) -> Scene {
-    debug_time!("load_example_scene");
     match scene {
         ExampleScene::MaterialDemo => material_demo(),
         ExampleScene::DefocusBlur => defocus_blur(),

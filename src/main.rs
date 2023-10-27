@@ -1,12 +1,12 @@
 #![feature(float_next_up_down)]
 
-mod args;
 mod example_scenes;
 mod flux;
 
+use std::str::FromStr;
+
 use crate::{
-    args::parse_args,
-    example_scenes::load_example_scene,
+    example_scenes::{load_example_scene, ExampleScene},
     flux::{
         integrators::Integrator,
         integrators::{AlbedoIntegrator, NormalIntegrator, PathTracingIntegrator},
@@ -15,20 +15,18 @@ use crate::{
 };
 
 use anyhow::Result;
+use clap::Parser;
 use log::{debug, info};
 use measure_time::{debug_time, trace_time};
 use num_format::{Locale, ToFormattedString};
+use strum::ParseError;
 
 fn main() -> Result<()> {
+    let args = Args::parse();
+
     env_logger::init();
-    trace_time!("main");
 
-    let args = parse_args()?;
-
-    let scene = {
-        info!("loading scene...");
-        load_example_scene(args.scene)
-    };
+    let scene = load_scene(&args)?;
 
     let renderer = {
         let integrator = Box::new(PathTracingIntegrator::new(8, 32, 0.1));
@@ -83,7 +81,7 @@ fn main() -> Result<()> {
         let albedo = {
             trace_time!("rendering albedo channel");
 
-            let result = render_aux(&scene, Box::new(AlbedoIntegrator::new()), args.dev);
+            let result = render_aux_channel(&scene, Box::new(AlbedoIntegrator::new()), args.dev);
             result
                 .film
                 .to_srgb_image()
@@ -94,7 +92,7 @@ fn main() -> Result<()> {
         let normal = {
             trace_time!("rendering normal channel");
 
-            let result = render_aux(&scene, Box::new(NormalIntegrator::new()), args.dev);
+            let result = render_aux_channel(&scene, Box::new(NormalIntegrator::new()), args.dev);
             result
                 .film
                 .to_srgb_image()
@@ -117,7 +115,20 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) -> RenderResult {
+fn load_scene(args: &Args) -> Result<Scene> {
+    info!("loading scene...");
+    debug_time!("loading scene");
+
+    let example_scene = ExampleScene::from_str(&args.scene)
+        .map_err(|parse_err| FluxError::Scene(args.scene.clone(), parse_err))?;
+    Ok(load_example_scene(example_scene))
+}
+
+fn render_aux_channel(
+    scene: &Scene,
+    integrator: Box<dyn Integrator>,
+    dev_mode: bool,
+) -> RenderResult {
     let samples_per_pixel = if dev_mode { 1 } else { 16 };
     let sampler = StratifiedSampler::new(samples_per_pixel);
 
@@ -125,4 +136,26 @@ fn render_aux(scene: &Scene, integrator: Box<dyn Integrator>, dev_mode: bool) ->
     let renderer = Renderer::new(integrator, sampler, passes, None);
 
     renderer.render_film(scene)
+}
+
+#[derive(Debug, thiserror::Error)]
+enum FluxError {
+    #[error("Failed to parse scene '{0}': {1}")]
+    Scene(String, ParseError),
+}
+
+#[derive(Parser)]
+#[command(version)]
+pub struct Args {
+    /// The example scene to render
+    #[arg(long, default_value = "cornellbox")]
+    pub scene: String,
+
+    /// Samples per pixel per pass
+    #[arg(long = "spp", default_value = "16")]
+    pub samples_per_pixel: usize,
+
+    /// Runs quick/noisy renders for iterating quickly
+    #[arg(long)]
+    pub dev: bool,
 }
