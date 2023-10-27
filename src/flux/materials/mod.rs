@@ -29,7 +29,7 @@ pub enum BxdfType {
 pub trait Material {
     fn scatter(&self, ray: &Ray, int: &Interaction, rng: &mut StdRng) -> Option<ScatterRec>;
 
-    fn emitted(&self, _int: &Interaction) -> Vec3 {
+    fn emitted(&self, _ray: &Ray, _int: &Interaction) -> Vec3 {
         Vec3::ZERO
     }
 

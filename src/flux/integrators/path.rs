@@ -1,5 +1,5 @@
 use glam::{vec3, Vec3};
-use log::trace;
+
 use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{ray::Ray, Scene};
@@ -52,7 +52,7 @@ impl PathTracingIntegrator {
                 }
             }
             Some(int) => {
-                let emitted = int.primitive.material.emitted(&int);
+                let emitted = int.primitive.material.emitted(ray, &int);
 
                 match int.primitive.material.scatter(ray, &int, rng) {
                     None => LiResult {

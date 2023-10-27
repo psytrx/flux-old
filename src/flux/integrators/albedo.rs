@@ -17,7 +17,7 @@ impl Integrator for AlbedoIntegrator {
     fn li(&self, scene: &Scene, ray: &Ray, rng: &mut StdRng) -> LiResult {
         match scene.intersect(ray) {
             Some(int) => {
-                let le = int.primitive.material.emitted(&int);
+                let le = int.primitive.material.emitted(ray, &int);
 
                 match int.primitive.material.scatter(ray, &int, rng) {
                     Some(srec) => {

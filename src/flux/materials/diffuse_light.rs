@@ -22,8 +22,13 @@ impl Material for DiffuseLightMaterial {
         None
     }
 
-    fn emitted(&self, int: &Interaction) -> Vec3 {
-        self.emit.evaluate(int)
+    fn emitted(&self, ray: &Ray, int: &Interaction) -> Vec3 {
+        let front_face = ray.direction.dot(int.n) < 0.0;
+        if front_face {
+            self.emit.evaluate(int)
+        } else {
+            Vec3::ZERO
+        }
     }
 
     fn bxdf_type(&self) -> BxdfType {
