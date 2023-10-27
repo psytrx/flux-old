@@ -29,6 +29,7 @@ fn main() -> Result<()> {
     env_logger::init();
 
     let args = Args::parse();
+    info!("{:?}", args);
 
     let scene = load_scene(&args)?;
     let renderer = setup_renderer(&args);
@@ -164,7 +165,7 @@ struct RenderStats {
     elapsed: Duration,
 }
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[command(version)]
 pub struct Args {
     /// The example scene to render
@@ -176,7 +177,7 @@ pub struct Args {
     sweeps: usize,
 
     /// Samples/pixel/pass
-    #[arg(long = "spp", default_value = "16")]
+    #[arg(long = "spp", default_value = "4")]
     spp: usize,
 
     /// Minimum tracing path depth
@@ -202,8 +203,4 @@ pub struct Args {
     /// Update interval for intermediate render results
     #[arg(long = "update-interval", short = 'u', default_value = "1")]
     update_interval: u32,
-
-    /// Switch for running quick debug renders. Overrides most of the other settings
-    #[arg(long)]
-    dev: bool,
 }
