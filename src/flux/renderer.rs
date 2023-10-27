@@ -1,4 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
 
 use glam::{vec2, UVec2};
 use log::debug;
@@ -27,52 +30,52 @@ impl Renderer {
     }
 
     pub fn render_film(&self, scene: &Scene) -> RenderResult {
-        let finished_passes = (0..self.num_passes)
+        let render_passes = (0..self.num_passes)
             .collect::<Vec<_>>()
             .into_par_iter()
             .map(|pass| self.render_pass(scene, pass));
 
         let resolution = scene.camera.resolution();
 
-        let merged_film = Arc::new(Mutex::new(Film::new(resolution)));
-        let passes_merged = Arc::new(Mutex::new(0));
-        let last_update = Arc::new(Mutex::new(std::time::Instant::now()));
-        let rays = Arc::new(Mutex::new(0));
-
         let num_cpus = num_cpus::get();
+        let update_interval = Duration::from_secs(1);
+        let shared = Arc::new(Mutex::new(SharedState {
+            merged_film: Film::new(resolution),
+            passes_merged: 0,
+            last_update: Instant::now() - update_interval,
+            total_rays: 0,
+        }));
 
-        finished_passes.for_each(|result| {
-            let mut merged_film = merged_film.lock().unwrap();
-            merged_film.merge_tile(UVec2::ZERO, result.film);
+        render_passes.for_each(|result| {
+            let mut shared = shared.lock().unwrap();
+            shared.merged_film.merge_tile(UVec2::ZERO, result.film);
+            shared.passes_merged += 1;
+            shared.total_rays += result.rays;
 
-            let mut passes_merged = passes_merged.lock().unwrap();
-            *passes_merged += 1;
+            let should_update = shared.passes_merged % num_cpus == 0
+                && shared.passes_merged < self.num_passes
+                && shared.last_update.elapsed() > Duration::from_secs(1);
+            if should_update {
+                shared
+                    .merged_film
+                    .to_srgb_image()
+                    .save("./output/output.png")
+                    .unwrap();
+                shared.last_update = Instant::now();
 
-            let mut rays = rays.lock().unwrap();
-            *rays += result.rays;
-
-            if *passes_merged % num_cpus == 0 && *passes_merged < self.num_passes {
-                let mut last_update = last_update.lock().unwrap();
-                if last_update.elapsed() > std::time::Duration::from_secs(1) {
-                    merged_film
-                        .to_srgb_image()
-                        .save("./output/output.png")
-                        .unwrap();
-                    *last_update = std::time::Instant::now();
-
-                    let progress = 100.0 * (*passes_merged as f32 / self.num_passes as f32);
-                    debug!(
-                        "{} / {} ({:>6.3}%)",
-                        passes_merged, self.num_passes, progress
-                    );
-                }
+                let progress = 100.0 * (shared.passes_merged as f32 / self.num_passes as f32);
+                debug!(
+                    "{} / {} ({:>6.3}%)",
+                    shared.passes_merged, self.num_passes, progress
+                );
             }
         });
 
-        let film = Arc::try_unwrap(merged_film).unwrap().into_inner().unwrap();
-        let rays = Arc::try_unwrap(rays).unwrap().into_inner().unwrap();
-
-        RenderResult { film, rays }
+        let shared = Arc::try_unwrap(shared).unwrap().into_inner().unwrap();
+        RenderResult {
+            film: shared.merged_film,
+            rays: shared.total_rays,
+        }
     }
 
     fn render_pass(&self, scene: &Scene, pass: usize) -> RenderResult {
@@ -99,6 +102,14 @@ impl Renderer {
 
         RenderResult { film, rays }
     }
+}
+
+#[derive(Debug)]
+struct SharedState {
+    merged_film: Film,
+    passes_merged: usize,
+    last_update: Instant,
+    total_rays: usize,
 }
 
 pub struct RenderResult {
