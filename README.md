@@ -4,7 +4,7 @@ Physically based ray tracing adventures in Rust.
 
 ## Getting Started
 
-## Usage
+### Usage
 
 ```bash
 $ flux --help
@@ -38,9 +38,22 @@ Options:
           Print version
 ```
 
+### Logging
+
+Flux uses [env_logger](https://docs.rs/env_logger/) for logging.
+To enable logging, set the corresponding environment variables to control verbosity:
+
+```bash
+RUST_LOG=debug flux [OPTIONS]
+# available options: trace, debug, info, warn, error
+```
+
 ## Example Scenes
 
-Available scenes:
+Currently, flux does not provide a way to load custom scenes.
+However, this is on the roadamap for the near future.
+
+Until then, you can load one of the example scenes:
 
 - CornellBox
 - DefocusBlur
