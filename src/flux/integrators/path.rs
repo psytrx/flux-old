@@ -1,5 +1,6 @@
 use glam::Vec3;
 
+use log::trace;
 use rand::{rngs::StdRng, Rng};
 
 use crate::flux::{interaction::spawn_ray, ray::Ray, BxdfType, Scene};
@@ -73,30 +74,25 @@ impl PathTracingIntegrator {
 
                         let direction = sampled_point - int.p;
                         let distance = direction.length();
-
-                        let shadow_ray = spawn_ray(int.p, direction, ray.time);
-                        // trace!(
-                        //     "Shadow ray: {:?} -> {:?}",
-                        //     shadow_ray.origin,
-                        //     shadow_ray.direction
-                        // );
+                        let distance_squared = direction.length_squared();
+                        let direction = direction.normalize();
+                        let shadow_ray = spawn_ray(int.p, 8.0 * direction, ray.time);
 
                         // TODO: magic number. Find a better way to handle t_max
-                        let t_max = 0.999 * distance;
-                        let occluded = scene.occluded(&shadow_ray, t_max);
-                        if occluded {
+                        let t_max = 0.99 * distance;
+                        if scene.occluded(&shadow_ray, t_max) {
                             return LiResult {
-                                li: rr_factor * (emitted * srec.attenuation),
+                                li: rr_factor * emitted,
                                 rays: 1,
                             };
                         }
 
-                        let distance_squared = distance * direction.length_squared();
                         let cosine = (direction.dot(int.n) / direction.length()).abs();
                         let pdf_val = distance_squared / (cosine * sampled_light.shape.area());
 
-                        let scattering_pdf =
-                            int.primitive
+                        let scattering_pdf = 2.0
+                            * int
+                                .primitive
                                 .material
                                 .scattering_pdf(ray, &int, &shadow_ray);
 

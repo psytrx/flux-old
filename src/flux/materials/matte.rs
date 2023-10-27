@@ -45,7 +45,6 @@ impl Material for MatteMaterial {
     }
 
     fn scattering_pdf(&self, _ray: &Ray, _int: &Interaction, _scattered: &Ray) -> f32 {
-        // INFO: We assume the ray direction is normalized
         1.0 / (2.0 * PI)
     }
 }
