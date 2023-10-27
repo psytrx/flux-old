@@ -1,8 +1,8 @@
 mod infinite;
 mod sky;
 
-pub use infinite::InfiniteAreaLight;
-pub use sky::SkyLight;
+pub use infinite::*;
+pub use sky::*;
 
 use glam::Vec3;
 

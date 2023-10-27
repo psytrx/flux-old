@@ -2,9 +2,9 @@ mod albedo;
 mod normal;
 mod path;
 
-pub use albedo::AlbedoIntegrator;
-pub use normal::NormalIntegrator;
-pub use path::PathTracingIntegrator;
+pub use albedo::*;
+pub use normal::*;
+pub use path::*;
 
 use glam::Vec3;
 use rand::rngs::StdRng;

@@ -16,16 +16,16 @@ pub mod shapes;
 pub mod textures;
 mod updater;
 
-pub use bounds::Bounds2;
+pub use bounds::*;
 pub use cameras::*;
-pub use denoise::Denoiser;
+pub use denoise::*;
 pub use film::Film;
 pub use materials::*;
-pub use primitive::Primitive;
-pub use renderer::{RenderResult, Renderer};
-pub use sampler::StratifiedSampler;
-pub use scene::Scene;
-pub use updater::{DefaultRenderUpdater, RenderUpdater};
+pub use primitive::*;
+pub use renderer::*;
+pub use sampler::*;
+pub use scene::*;
+pub use updater::*;
 
 use std::f32::consts::PI;
 

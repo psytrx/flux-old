@@ -3,10 +3,10 @@ mod diffuse_light;
 mod matte;
 mod metal;
 
-pub use dielectric::DielectricMaterial;
-pub use diffuse_light::DiffuseLightMaterial;
-pub use matte::MatteMaterial;
-pub use metal::MetalMaterial;
+pub use dielectric::*;
+pub use diffuse_light::*;
+pub use matte::*;
+pub use metal::*;
 
 use glam::Vec3;
 use rand::rngs::StdRng;

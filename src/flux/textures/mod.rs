@@ -5,12 +5,12 @@ mod multiply;
 mod noise;
 mod uv;
 
-pub use checker::CheckerTexture;
-pub use constant::ConstantTexture;
-pub use image::ImageTexture;
-pub use multiply::MultiplyTexture;
-pub use noise::NoiseTexture;
-pub use uv::UvTexture;
+pub use checker::*;
+pub use constant::*;
+pub use image::*;
+pub use multiply::*;
+pub use noise::*;
+pub use uv::*;
 
 use super::interaction::Interaction;
 

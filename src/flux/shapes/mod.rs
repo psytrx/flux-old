@@ -6,13 +6,13 @@ mod subdivision;
 mod transform;
 mod trimesh;
 
-pub use floor::Floor;
-pub use quad::Quad;
-pub use quadbox::QuadBox;
-pub use sphere::Sphere;
-pub use subdivision::SubdivisionMesh;
-pub use transform::Transform;
-pub use trimesh::TriangleMesh;
+pub use floor::*;
+pub use quad::*;
+pub use quadbox::*;
+pub use sphere::*;
+pub use subdivision::*;
+pub use transform::*;
+pub use trimesh::*;
 
 use embree4_sys::{RTCDevice, RTCGeometry};
 use glam::{Vec2, Vec3};
